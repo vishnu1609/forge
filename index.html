@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FORGE — Hypertrophy Gym Workout Plan</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#080908;--bg2:#0f100f;--bg3:#161716;--panel:#1c1e1c;--border:#252725;--muted:#3a3d3a;--dim:#6b706b;--text:#ccd0cc;--bright:#ecf0ec;--acid:#b8f040;--acid2:#90c828;--acid-dim:#2a3808;--acid-glow:rgba(184,240,64,0.07);--red:#f04848;--orange:#f08830;--blue:#48a8f8;--teal:#38d8c0;--purple:#c868f0;--yellow:#f0d040;}
+*{margin:0;padding:0;box-sizing:border-box;}html{scroll-behavior:smooth;}
+body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+.hero{position:relative;overflow:hidden;padding:52px 40px 44px;border-bottom:1px solid var(--border);}
+.hero-grid{position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent,transparent 59px,rgba(184,240,64,0.025) 60px),repeating-linear-gradient(0deg,transparent,transparent 59px,rgba(184,240,64,0.025) 60px);pointer-events:none;}
+.hero-glow{position:absolute;top:-100px;right:-100px;width:500px;height:500px;background:radial-gradient(circle,rgba(184,240,64,0.06) 0%,transparent 70%);pointer-events:none;}
+.gym-tag{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--acid);letter-spacing:3px;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.live-dot{width:6px;height:6px;background:var(--acid);border-radius:50%;animation:blink 1.8s ease-in-out infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
+.hero-title{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:clamp(52px,9vw,108px);line-height:.88;letter-spacing:-1px;color:var(--bright);margin-bottom:16px;}
+.hero-title .hi{color:var(--acid);}
+.hero-sub{font-size:14px;color:var(--dim);max-width:500px;line-height:1.65;font-weight:300;}
+.hero-stats{display:flex;gap:24px;flex-wrap:wrap;margin-top:20px;}
+.hs-item{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--dim);letter-spacing:2px;}
+.hs-item strong{color:var(--acid);}
+.nav-bar{display:flex;overflow-x:auto;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:200;background:rgba(8,9,8,.96);backdrop-filter:blur(10px);}
+.nav-btn{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);padding:14px 18px;border:none;background:none;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:all .2s;text-transform:uppercase;}
+.nav-btn:hover{color:var(--text);}.nav-btn.active{color:var(--acid);border-bottom-color:var(--acid);}
+.view{display:none;animation:fadeUp .3s ease;}.view.active{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+.info-strip{display:flex;border-bottom:1px solid var(--border);overflow-x:auto;}
+.info-cell{flex:1;min-width:110px;padding:18px 20px;border-right:1px solid var(--border);text-align:center;}
+.info-cell:last-child{border-right:none;}
+.ic-val{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:24px;color:var(--bright);line-height:1;}
+.ic-unit{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--acid);}
+.ic-label{font-family:'JetBrains Mono',monospace;font-size:7px;color:var(--muted);letter-spacing:2px;margin-top:3px;}
+.sessions-wrap{padding:28px 40px 0;}
+.session-card{background:var(--bg2);border:1px solid var(--border);margin-bottom:24px;overflow:hidden;transition:border-color .2s;}
+.session-card:hover{border-color:var(--muted);}
+.session-head{cursor:pointer;user-select:none;}
+.sh-main{display:grid;grid-template-columns:80px 1fr auto;align-items:center;}
+.sh-letter{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:60px;line-height:1;text-align:center;padding:14px 0;opacity:.13;color:var(--bright);}
+.sh-info{padding:14px 20px 14px 0;}
+.sh-day-tag{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--dim);margin-bottom:4px;}
+.sh-name{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:24px;color:var(--bright);line-height:1.1;}
+.sh-muscles{font-size:11px;color:var(--dim);margin-top:3px;font-weight:300;}
+.sh-right{padding:14px 20px;display:flex;flex-direction:column;align-items:flex-end;gap:5px;}
+.sh-dur{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--acid);}
+.sh-count{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--muted);}
+.sh-toggle{font-size:16px;color:var(--muted);transition:transform .3s;margin-top:3px;}
+.session-card.open .sh-toggle{transform:rotate(180deg);}
+.color-bar{height:3px;}
+.cb-push{background:linear-gradient(90deg,var(--blue),var(--teal));}
+.cb-pull{background:linear-gradient(90deg,var(--red),var(--orange));}
+.cb-legs{background:linear-gradient(90deg,var(--acid),var(--acid2));}
+.ex-body{display:none;border-top:1px solid var(--border);}
+.session-card.open .ex-body{display:block;}
+.phase-strip{display:flex;border-bottom:1px solid var(--border);overflow-x:auto;background:var(--bg3);}
+.phase-pill{font-family:'JetBrains Mono',monospace;font-size:8px;padding:8px 14px;border-right:1px solid var(--border);color:var(--muted);white-space:nowrap;letter-spacing:1px;}
+.phase-pill:last-child{border-right:none;}.phase-pill.act{color:var(--acid);background:var(--acid-glow);}
+.ex-table{width:100%;border-collapse:collapse;}
+.ex-table th{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--muted);padding:9px 12px;text-align:left;border-bottom:1px solid var(--border);background:var(--bg3);}
+.ex-table td{padding:11px 12px;border-bottom:1px solid var(--bg3);vertical-align:top;font-size:12px;color:var(--text);}
+.ex-table tr:last-child td{border-bottom:none;}.ex-table tr:hover td{background:var(--acid-glow);}
+.ex-num{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);width:24px;}
+.ex-name{font-size:13px;font-weight:600;color:var(--bright);display:block;margin-bottom:2px;}
+.ex-equip{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--dim);}
+.sets-cell{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--acid);font-weight:500;white-space:nowrap;}
+.sets-ph{font-size:8px;color:var(--dim);display:block;margin-top:2px;}
+.rest-cell{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--teal);white-space:nowrap;}
+.note-cell{font-size:11px;color:var(--dim);line-height:1.5;max-width:200px;}
+.note-cell strong{color:var(--text);font-weight:500;}
+.ttag{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:7px;padding:2px 5px;border:1px solid var(--muted);color:var(--muted);margin-top:3px;letter-spacing:1px;}
+.tt-ss{border-color:rgba(200,104,240,.4);color:var(--purple);}
+.tt-ds{border-color:rgba(240,136,48,.4);color:var(--orange);}
+.tt-myo{border-color:rgba(56,216,192,.4);color:var(--teal);}
+.abs-row td{background:var(--acid-glow) !important;}
+.cardio-block{margin:0 40px 24px;padding:16px 20px;background:var(--acid-glow);border:1px solid rgba(184,240,64,.2);}
+.cb-title{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--acid);letter-spacing:2px;margin-bottom:6px;}
+.cb-text{font-size:12px;color:var(--dim);line-height:1.6;}
+.cb-text strong{color:var(--text);}
+.overview-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);margin:20px 40px;}
+.og-cell{background:var(--bg2);padding:18px;}
+.ogc-label{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:2px;margin-bottom:5px;}
+.ogc-val{font-size:13px;color:var(--bright);font-weight:500;line-height:1.4;}
+.ogc-val em{color:var(--acid);font-style:normal;}
+.split-table{margin:0 40px 28px;border-collapse:collapse;width:calc(100% - 80px);}
+.split-table th{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--muted);padding:9px 12px;text-align:left;border-bottom:1px solid var(--border);}
+.split-table td{padding:11px 12px;border-bottom:1px solid var(--bg3);font-size:12px;color:var(--text);vertical-align:top;}
+.split-table tr:last-child td{border-bottom:none;}
+.split-table td:first-child{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:16px;color:var(--bright);}
+.dtag{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:7px;padding:2px 7px;margin-right:5px;}
+.dt-p{background:rgba(72,168,248,.1);color:var(--blue);border:1px solid rgba(72,168,248,.2);}
+.dt-pu{background:rgba(240,72,72,.1);color:var(--red);border:1px solid rgba(240,72,72,.2);}
+.dt-l{background:rgba(184,240,64,.08);color:var(--acid);border:1px solid rgba(184,240,64,.18);}
+.dt-r{background:rgba(107,112,107,.1);color:var(--muted);border:1px solid var(--border);}
+.waist-track{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);}
+.wt-cell{background:var(--bg2);padding:16px;}
+.wt-week{font-family:'JetBrains Mono',monospace;font-size:7px;color:var(--muted);letter-spacing:2px;margin-bottom:5px;}
+.wt-val{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:26px;color:var(--bright);line-height:1;}
+.wt-unit{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--acid);}
+.wt-bar{height:3px;background:var(--bg3);margin-top:7px;overflow:hidden;}
+.wt-fill{height:100%;background:linear-gradient(90deg,var(--red),var(--acid));}
+.wt-note{font-size:10px;color:var(--dim);margin-top:4px;}
+.prog-list{list-style:none;}
+.prog-item{display:grid;grid-template-columns:155px 1fr;border-bottom:1px solid var(--border);padding:12px 0;}
+.prog-item:first-child{border-top:1px solid var(--border);}
+.pi-var{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--dim);letter-spacing:1px;padding-right:14px;line-height:1.4;}
+.pi-val{font-size:12px;color:var(--text);line-height:1.6;}
+.pi-val strong{color:var(--bright);}
+.sec-pad{padding:32px 40px 0;}
+.sec-tag{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--acid);letter-spacing:3px;margin-bottom:5px;}
+.sec-h2{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:30px;color:var(--bright);letter-spacing:-.3px;}
+.sec-sub{font-size:13px;color:var(--dim);margin-top:5px;font-weight:300;max-width:540px;line-height:1.6;}
+.sec-rule{height:1px;background:var(--border);margin:14px 40px 0;}
+.footer{padding:28px 40px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+.ft-brand{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:32px;color:var(--muted);letter-spacing:2px;}
+.ft-note{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--muted);text-align:right;line-height:1.9;}
+::-webkit-scrollbar{width:3px;height:3px;}::-webkit-scrollbar-track{background:var(--bg);}::-webkit-scrollbar-thumb{background:var(--muted);}
+@media(max-width:600px){.hero,.sessions-wrap{padding-left:16px;padding-right:16px;}.overview-grid,.split-table,.cardio-block{margin-left:0;margin-right:0;width:100%;}.sh-main{grid-template-columns:52px 1fr auto;}.sh-letter{font-size:40px;}.ex-table th:nth-child(6),.ex-table td:nth-child(6){display:none;}.prog-item{grid-template-columns:1fr;}.pi-var{padding-bottom:4px;}}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="gym-tag"><span class="live-dot"></span>HYPERTROPHY GYM BY CULT · BACHUPALLY, HYDERABAD</div>
+  <h1 class="hero-title">FULL GYM<br><span class="hi">ATTACK</span><br>PROGRAM</h1>
+  <p class="hero-sub">Complete PPL program built for every machine at Hypertrophy Gym. 10 exercises per session including supersets, drop sets and myo-reps. 75–90 min. Designed around 28% BF + 35-inch waist goal.</p>
+  <div class="hero-stats">
+    <div class="hs-item">WEIGHT <strong>107KG</strong></div>
+    <div class="hs-item">HEIGHT <strong>186CM</strong></div>
+    <div class="hs-item">BF <strong>~28%</strong></div>
+    <div class="hs-item">WAIST NOW <strong>35IN</strong></div>
+    <div class="hs-item">WAIST TARGET <strong>30–31IN</strong></div>
+    <div class="hs-item">SESSION <strong>75–90 MIN</strong></div>
+  </div>
+</div>
+
+<div class="nav-bar">
+  <button class="nav-btn active" onclick="switchView('overview',this)">Overview</button>
+  <button class="nav-btn" onclick="switchView('push',this)">Push A+B</button>
+  <button class="nav-btn" onclick="switchView('pull',this)">Pull A+B</button>
+  <button class="nav-btn" onclick="switchView('legs',this)">Legs A+B</button>
+  <button class="nav-btn" onclick="switchView('waist',this)">Waist Protocol</button>
+  <button class="nav-btn" onclick="switchView('progression',this)">Progression</button>
+</div>
+
+<div class="info-strip">
+  <div class="info-cell"><div class="ic-val">6<span class="ic-unit">days</span></div><div class="ic-label">Per Week</div></div>
+  <div class="info-cell"><div class="ic-val">90<span class="ic-unit">min</span></div><div class="ic-label">Max Session</div></div>
+  <div class="info-cell"><div class="ic-val">10<span class="ic-unit">ex</span></div><div class="ic-label">Per Session</div></div>
+  <div class="info-cell"><div class="ic-val">PPL<span class="ic-unit">×2</span></div><div class="ic-label">Split</div></div>
+  <div class="info-cell"><div class="ic-val">35<span class="ic-unit">in</span></div><div class="ic-label">Waist Now</div></div>
+  <div class="info-cell"><div class="ic-val">30<span class="ic-unit">in</span></div><div class="ic-label">Waist Goal</div></div>
+</div>
+
+<!-- OVERVIEW -->
+<div id="view-overview" class="view active">
+  <div class="sec-pad"><div class="sec-tag">// Program Design</div><div class="sec-h2">How This Program Works</div><div class="sec-sub">Every piece of equipment at Hypertrophy Gym is used. Each session has 2 heavy compounds + 7–8 accessories with advanced techniques. Core at the end of every session targets waist reduction.</div></div>
+  <div class="sec-rule"></div>
+  <div class="overview-grid">
+    <div class="og-cell"><div class="ogc-label">Training Split</div><div class="ogc-val"><em>Push / Pull / Legs</em> × 2 per week</div></div>
+    <div class="og-cell"><div class="ogc-label">Session Structure</div><div class="ogc-val"><em>2 compounds</em> heavy + <em>7–8 accessories</em> + core</div></div>
+    <div class="og-cell"><div class="ogc-label">Rep Ranges</div><div class="ogc-val">Compounds <em>5–8</em> · Accessories <em>10–20</em></div></div>
+    <div class="og-cell"><div class="ogc-label">Tempo</div><div class="ogc-val"><em>2-1-2</em> — 2s down, 1s hold, 2s up</div></div>
+    <div class="og-cell"><div class="ogc-label">Rest — Compounds</div><div class="ogc-val"><em>2–3 minutes</em> strictly timed</div></div>
+    <div class="og-cell"><div class="ogc-label">Rest — Accessories</div><div class="ogc-val"><em>60–90 seconds</em> between sets</div></div>
+    <div class="og-cell"><div class="ogc-label">Advanced Techniques</div><div class="ogc-val"><em>Drop sets, supersets, myo-reps</em> in accessories</div></div>
+    <div class="og-cell"><div class="ogc-label">Post-Session Cardio</div><div class="ogc-val"><em>15 min LISS</em> — treadmill/bike after push & pull</div></div>
+    <div class="og-cell"><div class="ogc-label">Core — Every Session</div><div class="ogc-val"><em>10–12 min</em> waist-targeting core finisher</div></div>
+    <div class="og-cell"><div class="ogc-label">Waist Projection</div><div class="ogc-val">35in → <em>30–31in</em> over 24–28 weeks</div></div>
+  </div>
+  <div class="sec-pad" style="padding-top:22px;"><div class="sec-tag">// Weekly Structure</div><div class="sec-h2">7-Day Training Split</div></div>
+  <div class="sec-rule"></div>
+  <table class="split-table" style="margin-top:18px;">
+    <thead><tr><th>DAY</th><th>SESSION</th><th>PRIMARY MUSCLES</th><th>KEY EQUIPMENT</th><th>DURATION</th></tr></thead>
+    <tbody>
+      <tr><td>MONDAY</td><td><span class="dtag dt-p">PUSH A</span>Chest-Dominant Push</td><td>Pecs, Front delts, Lateral delts, Triceps</td><td>Barbell bench, cables, pec deck, DB</td><td>80–90 min</td></tr>
+      <tr><td>TUESDAY</td><td><span class="dtag dt-pu">PULL A</span>Back Width + Thickness</td><td>Lats, Rhomboids, Traps, Biceps</td><td>Pull-up bar, lat pulldown, barbell row, cable</td><td>80–90 min</td></tr>
+      <tr><td>WEDNESDAY</td><td><span class="dtag dt-l">LEGS A</span>Quad-Dominant</td><td>Quads, Glutes, Hamstrings, Calves</td><td>Squat rack, hack squat, leg press, machines</td><td>85–90 min</td></tr>
+      <tr><td>THURSDAY</td><td><span class="dtag dt-p">PUSH B</span>Shoulder-Dominant Push</td><td>Lateral delts, Upper chest, Triceps</td><td>Smith machine OHP, cables, lateral machine</td><td>75–85 min</td></tr>
+      <tr><td>FRIDAY</td><td><span class="dtag dt-pu">PULL B</span>Mid-Back + Bicep Peak</td><td>Mid-back, Rear delts, Biceps, Brachialis</td><td>T-bar row, chest-supported row, preacher curl</td><td>75–85 min</td></tr>
+      <tr><td>SATURDAY</td><td><span class="dtag dt-l">LEGS B</span>Posterior Chain</td><td>Hamstrings, Glutes, Lower back, Calves</td><td>Deadlift, hip thrust, GHD, cable kickback</td><td>85–90 min</td></tr>
+      <tr><td>SUNDAY</td><td><span class="dtag dt-r">REST</span>Active Recovery</td><td>Full body decompression</td><td>Walk 30–40 min + foam rolling + stretching</td><td>30–45 min</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- PUSH -->
+<div id="view-push" class="view">
+<div class="sessions-wrap">
+
+<div class="session-card open" id="cPushA">
+  <div class="color-bar cb-push"></div>
+  <div class="session-head" onclick="toggle('cPushA')">
+    <div class="sh-main">
+      <div class="sh-letter" style="color:var(--blue)">A</div>
+      <div class="sh-info"><div class="sh-day-tag">MONDAY · PUSH A</div><div class="sh-name">CHEST-DOMINANT PUSH</div><div class="sh-muscles">Pectoralis Major · Anterior Delts · Lateral Delts · Triceps</div></div>
+      <div class="sh-right"><div class="sh-dur">80–90 MIN</div><div class="sh-count">10 EXERCISES</div><div class="sh-toggle">▾</div></div>
+    </div>
+  </div>
+  <div class="ex-body">
+    <div class="phase-strip"><div class="phase-pill">WARM-UP: 7 MIN TREADMILL + SHOULDER CIRCLES + BAND PULL-APARTS × 20</div><div class="phase-pill act">HYPERTROPHY: 4×8–12 · ADAPTATION: 3×12–15 · STRENGTH: 5×4–6</div></div>
+    <table class="ex-table">
+      <thead><tr><th>#</th><th>EXERCISE</th><th>EQUIPMENT</th><th>SETS × REPS</th><th>REST</th><th>COACHING CUE</th></tr></thead>
+      <tbody>
+        <tr><td class="ex-num">01</td><td><span class="ex-name">Barbell Flat Bench Press</span><span class="ex-equip">Barbell · Power Rack</span></td><td style="font-size:10px;color:var(--dim)">Power rack</td><td class="sets-cell">4 × 5–7<span class="sets-ph">Main compound · RPE 8</span></td><td class="rest-cell">2–3 min</td><td class="note-cell"><strong>Arch, feet flat, elbows 75°.</strong> Touch sternum, 2s eccentric. Full drive off chest. Primary chest mass builder.</td></tr>
+        <tr><td class="ex-num">02</td><td><span class="ex-name">Incline DB Press</span><span class="ex-equip">Dumbbells · Incline Bench</span></td><td style="font-size:10px;color:var(--dim)">DB rack</td><td class="sets-cell">4 × 8–10<span class="sets-ph">Upper chest compound</span></td><td class="rest-cell">90 sec</td><td class="note-cell"><strong>30–45° incline.</strong> Full stretch at bottom. Don't bounce. Upper chest + front delt. Crucial for aesthetic chest shape.</td></tr>
+        <tr><td class="ex-num">03</td><td><span class="ex-name">Cable Crossover (Low → High)</span><span class="ex-equip">Cable Machine · Low Pulley</span></td><td style="font-size:10px;color:var(--dim)">Cable station</td><td class="sets-cell">3 × 12–15<span class="sets-ph">Constant tension</span></td><td class="rest-cell">75 sec</td><td class="note-cell"><strong>Slight forward lean.</strong> Cross hands at top, squeeze chest. Full stretch at bottom = full ROM. Cables keep tension throughout.</td></tr>
+        <tr><td class="ex-num">04</td><td><span class="ex-name">Pec Deck / Chest Fly Machine</span><span class="ex-equip">Pec Deck Machine</span></td><td style="font-size:10px;color:var(--dim)">Machine area</td><td class="sets-cell">3 × 12–15<span class="sets-ph">+drop set on final set</span></td><td class="rest-cell">60 sec</td><td class="note-cell"><strong>Pause 1s peak contraction.</strong> Final set: drop 25% weight, do 10 more reps. Pure chest isolation — no triceps. <span class="ttag tt-ds">DROP SET</span></td></tr>
+        <tr><td class="ex-num">05</td><td><span class="ex-name">Seated DB Lateral Raise</span><span class="ex-equip">Dumbbells · Flat Bench</span></td><td style="font-size:10px;color:var(--dim)">DB rack</td><td class="sets-cell">4 × 15–20<span class="sets-ph">Lateral delt priority</span></td><td class="rest-cell">60 sec</td><td class="note-cell"><strong>Lead with elbow, not wrist.</strong> Slight forward lean. Raise to shoulder height. The #1 exercise for wide, capped shoulders.</td></tr>
+        <tr><td class="ex-num">06</td><td><span class="ex-name">Cable Lateral Raise (Single Arm)</span><span class="ex-equip">Cable Machine · Low Pulley</span></td><td style="font-size:10px;color:var(--dim)">Cable station</td><td class="sets-cell">3 × 15/arm<span class="sets-ph">Superset after DB raise</span></td><td class="rest-cell">45 sec</td><td class="note-cell"><strong>Cable arm crosses body at start.</strong> Keeps tension at top unlike DB. Superset immediately after DB laterals. <span class="ttag tt-ss">SUPERSET</span></td></tr>
+        <tr><td class="ex-num">07</td><td><span class="ex-name">Triceps Rope Pushdown</span><span class="ex-equip">Cable Machine · Rope</span></td><td style="font-size:10px;color:var(--dim)">Cable station</td><td class="sets-cell">4 × 12–15<span class="sets-ph">Lateral head focus</span></td><td class="rest-cell">60 sec</td><td class="note-cell"><strong>Elbows pinned to sides.</strong> Spread rope at bottom for full extension. Squeeze lateral head hard at lockout.</td></tr>
+        <tr><td class="ex-num">08</td><td><span class="ex-name">Overhead Cable Tricep Extension</span><span class="ex-equip">Cable Machine · Rope</span></td><td style="font-size:10px;color:var(--dim)">Cable station</td><td class="sets-cell">3 × 12–15<span class="sets-ph">Long head stretch</span></td><td class="rest-cell">60 sec</td><td class="note-cell"><strong>Face away from cable.</strong> Extend overhead fully. Stretch = best long head activation. Superset with pushdown. <span class="ttag tt-ss">SUPERSET</span></td></tr>
+        <tr><td class="ex-num">09</td><td><span class="ex-name">Weighted Dips</span><span class="ex-equip">Dip Station + Belt/Plate</span></td><td style="font-size:10px;color:var(--dim)">Dip station</td><td class="sets-cell">3 × 8–10<span class="sets-ph">Add weight when 10+ easy</span></td><td class="rest-cell">90 sec</td><td class="note-cell"><strong>Lean forward slightly for chest.</strong> Lower until shoulder below elbow. Best triceps + lower chest compound finisher.</td></tr>
+        <tr class="abs-row"><td class="ex-num" style="color:var(--acid)">ABS</td><td><span class="ex-name">Weighted Cable Crunch + Hanging Leg Raise</span><span class="ex-equip">Cable + Pull-up Bar</span></td><td style="font-size:10px;color:var(--dim)">Cable / bar</td><td class="sets-cell">3×15 + 3×12<span class="sets-ph">Superset</span></td><td class="rest-cell">45 sec</td><td class="note-cell"><strong>Cable crunch:</strong> round spine fully, squeeze abs hard. <strong>Hanging raise:</strong> posterior pelvic tilt, bring hips UP not just legs. No swinging. <span class="ttag tt-ss">SUPERSET</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="session-card open" id="cPushB">
+  <div class="color-bar cb-push"></div>
+  <div class="session-head" onclick="toggle('cPushB')">
+    <div class="sh-main">
+      <div class="sh-letter" style="color:var(--teal)">B</div>
+      <div class="sh-info"><div class="sh-day-tag">THURSDAY · PUSH B</div><div class="sh-name">SHOULDER-DOMINANT PUSH</div><div class="sh-muscles">Lateral Delts · Anterior Delts · Upper Chest · Triceps Long Head</div></div>
+      <div class="sh-right"><div class="sh-dur">75–85 MIN</div><div class="sh-count">10 EXERCISES</div><div class="sh-toggle">▾</div></div>
+    </div>
+  </div>
+  <div class="ex-body">
+    <div class="phase-strip"><div class="phase-pill">WARM-UP: 7 MIN BIKE + BAND PULL-APARTS + FACE PULLS × 20 LIGHT</div><div class="phase-pill act">BOULDER SHOULDER PROTOCOL · SHOULDER VOLUME PRIORITY</div></div>
+    <table class="ex-table">
+      <thead><tr><th>#</th><th>EXERCISE</th><th>EQUIPMENT</th><th>SETS × REPS</th><th>REST</th><th>COACHING CUE</th></tr></thead>
+      <tbody>
+        <tr><td class="ex-num">01</td><td><span class="ex-name">Seated Smith Machine OHP</span><span class="ex-equip">Smith Machine + Bench</span></td><td style="font-size:10px;color:var(--dim)">Smith machine</td><td class="sets-cell">4 × 6–8<span class="sets-ph">Heavier OHP safely</span></td><td class="rest-cell">2–3 min</td><td class="note-cell"><strong>Lower to chin level.</strong> Full lockout overhead. Neutral spine, no rib flare. Smith allows heavier loading than free barbell OHP.</td></tr>
+        <tr><td class="ex-num">02</td><td><span class="ex-name">DB Arnold Press</span><span class="ex-equip">Dumbbells · Adjustable Bench</span></td><td style="font-size:10px;color:var(--dim)">DB rack</td><td class="sets-cell">3 × 10–12<span class="sets-ph">All 3 delt heads</span></td><td class="rest-cell">90 sec</td><td class="note-cell"><strong>Start palms facing you, rotate outward.</strong> Full ROM through shoulder rotation. Hits anterior, lateral, and rear delt in one movement.</td></tr>
+        <tr><td class="ex-num">03</td><td><span class="ex-name">Lateral Raise Machine</span><span class="ex-equip">Lateral Raise Machine</span></td><td style="font-size:10px;color:var(--dim)">Machine area</td><td class="sets-cell">4 × 15–20<span class="sets-ph">+myo-reps on final set</span></td><td class="rest-cell">60 sec</td><td class="note-cell"><strong>Machine = higher tension at top.</strong> Final set myo-rep: 20 reps, rest 10s, do 5, rest 10s, do 5, rest 10s, do 5. <span class="ttag tt-myo">MYO-REPS</span></td></tr>
+        <tr><td class="ex-num">04</td><td><span class="ex-name">Incline Lateral Raise (Lying)</span><span class="ex-equip">Dumbbell · Incline Bench</span></td><td style="font-size:10px;color:var(--dim)">DB rack</td><td class="sets-cell">3 × 15–20<span class="sets-ph">Max lateral delt stretch</span></td><td class="rest-cell">60 sec</td><td class="note-cell"><strong>Lie on side on incline bench.</strong> Arm hangs below shoulder — maximum stretch. Most underutilised shoulder exercise. Supercharged lateral delt.</td></tr>
+        <tr><td class="ex-num">05</td><td><span class="ex-name">Incline Barbell Bench Press</span><span class="ex-equip">Barbell · Incline Bench · Rack</span></td><td style="font-size:10px;color:var(--dim)">Power rack</td><td class="sets-cell">3 × 8–10<span class="sets-ph">Upper chest compound</span></td><td class="rest-cell">90 sec</td><td class="note-cell"><strong>45° incline, wide grip.</strong> Touch upper chest. Full ROM. Upper pec development = crucial for the aesthetic "shelf" chest look.</td></tr>
+        <tr><td class="ex-num">06</td><td><span class="ex-name">Cable Face Pull (High)</span><span class="ex-equip">Cable Machine · Rope</span></td><td style="font-size:10px;color:var(--dim)">Cable station</td><td class="sets-cell">4 × 15–20<span class="sets-ph">Shoulder health</span></td><td class="rest-cell">60 sec</td><td class="note-cell"><strong>Pull to eye level, elbows high and out.</strong> External rotation at end. Non-negotiable shoulder health movement — do this every push session forever.</td></tr>
+        <tr><td class="ex-num">07</td><td><span class="ex-name">Close-Grip Bench Press</span><span class="ex-equip">Barbell · Flat Bench</span></td><td style="font-size:10px;color:var(--dim)">Power rack</td><td class="sets-cell">3 × 10–12<span class="sets-ph">Tricep compound</span></td><td class="rest-cell">90 sec</td><td class="note-cell"><strong>Shoulder-width grip.</strong> Elbows tucked at 45°. Lower to lower chest. Best compound movement for triceps overall mass.</td></tr>
+        <tr><td class="ex-num">08</td><td><span class="ex-name">EZ Bar Skull Crushers</span><span class="ex-equip">EZ Curl Bar · Flat Bench</span></td><td style="font-size:10px;color:var(--dim)">Free weights</td><td class="sets-cell">3 × 12<span class="sets-ph">Superset w/ pushdown</span></td><td class="rest-cell">60 sec</td><td class="note-cell"><strong>Lower behind head not to forehead</strong> — more long head stretch. Go directly to pushdown after. Tri-sets the whole muscle. <span class="ttag tt-ss">SUPERSET</span></td></tr>
+        <tr><td class="ex-num">09</td><td><span class="ex-name">V-Bar Pushdown</span><span class="ex-equip">Cable Machine · V-Bar</span></td><td style="font-size:10px;color:var(--dim)">Cable station</td><td class="sets-cell">3 × 15<span class="sets-ph">Superset w/ skulls</span></td><td class="rest-cell">60 sec</td><td class="note-cell"><strong>Superset finish with skull crushers.</strong> Pre-exhausted triceps make this burn deeply. Full extension, elbows pinned. Finisher.</td></tr>
+        <tr class="abs-row"><td class="ex-num" style="color:var(--acid)">ABS</td><td><span class="ex-name">Ab Wheel Rollout + RKC Plank</span><span class="ex-equip">Ab Wheel + Mat</span></td><td style="font-size:10px;color:var(--dim)">Floor area</td><td class="sets-cell">3×8–10 + 3×40s<span class="sets-ph">Deep core</span></td><td class="rest-cell">30 sec</td><td class="note-cell"><strong>Rollout: extend fully, don't sag hips.</strong> RKC plank: pull elbows toward toes, squeeze everything. Best exercises for transverse abdominis = natural waist compression.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</div>
+<div class="cardio-block"><div class="cb-title">// POST-PUSH CARDIO (BOTH PUSH DAYS)</div><div class="cb-text"><strong>15 min incline treadmill walk</strong> immediately after. Grade 8–10%, speed 5–6 km/h, heart rate 130–140 BPM. Burns 150–180 kcal with zero recovery interference. This alone adds ~300–360 kcal/week of additional deficit.</div></div>
+</div>
+
+<!-- PULL -->
+<div id="view-pull" class="view">
+<div class="sessions-wrap">
+
+<div class="session-card open" id="cPullA">
+  <div class="color-bar cb-pull"></div>
+  <div class="session-head" onclick="toggle('cPullA')">
+    <div class="sh-main">
+      <div class="sh-letter" style="color:var(--red)">A</div>
+      <div class="sh-info"><div class="sh-day-tag">TUESDAY · PULL A</div><div class="sh-name">BACK WIDTH + THICKNESS</div><div class="sh-muscles">Lats · Rhomboids · Traps · Rear Delts · Biceps</div></div>
+      <div class="sh-right"><div class="sh-dur">80–90 MIN</div><div class="sh-count">10 EXERCISES</div><div class="sh-toggle">▾</div></div>
+    </div>
+  </div>
+  <div class="ex-body">
+    <div class="phase-strip"><div class="phase-pill">WARM-UP: 7 MIN ROWING MACHINE + DEAD HANGS × 3 + BAND PULL-APARTS</div><div class="phase-pill act">WIDTH FIRST (VERTICAL) → THICKNESS (HORIZONTAL) → ARMS</div></div>
+    <table class="ex-table">
+      <thead><tr><th>#</th><th>EXERCISE</th><th>EQUIPMENT</th><th>SETS × REPS</th><th>REST</th><th>COACHING CUE</th></tr></thead>
+      <tbody>
+        <tr><td class="ex-num">01</td><td><span class="ex-name">Weighted Pull-Ups</span><span class="ex-equip">Pull-up Bar + Weight Belt</span></td><td style="font-size:10px;color:var(--dim)">Pull-up station</td><td class="sets-cell">4 × 5–8<span class="sets-ph">BW if needed · add weight when 8+ easy</span></td><td class="rest-cell">2–3 min</td><td class="note-cell"><strong>Full dead hang start.</strong> Drive elbows to hips, chin over bar. Best lat width exercise in existence. Prioritise this above all.</td></tr>
+        <tr><td class="ex-num">02</td><td><span class="ex-name">Wide-Grip Lat Pulldown</span><span class="ex-equip">Cable Machine · Wide Bar</span></td><td style="font-size:10px;color:var(--dim)">Cable pulldown</td><td class="sets-cell">4 × 10–12<span class="sets-ph">Full lat stretch at top</span></td><td class="rest-cell">90 sec</td><td class="note-cell"><strong>Lean back 15°, pull to upper chest.</strong> Full arm extension at top — don't cheat the stretch. Drives lat width after pull-ups.</td></tr>
+        <tr><td class="ex-num">03</td><td><span class="ex-name">Barbell Bent-Over Row</span><span class="ex-equip">Barbell</span></td><td style="font-size:10px;color:var(--dim)">Free weights</td><td class="sets-cell">4 × 6–8<span class="sets-ph">45° torso · overhand</span></td><td class="rest-cell">2–3 min</td><td class="note-cell"><strong>Pull to lower sternum for lat bias.</strong> Retract scapula at top, 1s hold. Don't use lower back momentum. Heaviest back compound.</td></tr>
+        <tr><td class="ex-num">04</td><td><span class="ex-name">Seated Cable Row (Close Grip V-Handle)</span><span class="ex-equip">Cable Machine · V-Handle</span></td><td style="font-size:10px;color:var(--dim)">Cable station</td><td class="sets-cell">4 × 10–12<span class="sets-ph">Mid-back thickness</span></td><td class="rest-cell">90 sec</td><td class="note-cell"><strong>Chest up, sit tall.</strong> Pull handle to navel. Squeeze mid-back hard. Full forward stretch — feel the rhomboids load. No momentum.</td></tr>
+        <tr><td class="ex-num">05</td><td><span class="ex-name">Single Arm DB Row</span><span class="ex-equip">Heavy Dumbbell + Flat Bench</span></td><td style="font-size:10px;color:var(--dim)">DB rack</td><td class="sets-cell">3 × 12/arm<span class="sets-ph">Heavy — drive elbow back</span></td><td class="rest-cell">60 sec</td><td class="note-cell"><strong>Allow full shoulder depression at bottom.</strong> Drive elbow fully behind torso. Go heavy here — single-arm allows 80–100% of row strength.</td></tr>
+        <tr><td class="ex-num">06</td><td><span class="ex-name">Straight-Arm Cable Pulldown</span><span class="ex-equip">Cable Machine · Straight Bar</span></td><td style="font-size:10px;color:var(--dim)">Cable station</td><td class="sets-cell">3 × 15<span class="sets-ph">Pure lat — no bicep</span></td><td class="rest-cell">60 sec</td><td class="note-cell"><strong>Arms straight throughout.</strong> Hinge at shoulder only. Feel the lat stretch at top. Isolates lat completely without bicep interference.</td></tr>
+        <tr><td class="ex-num">07</td><td><span class="ex-name">Incline DB Curl</span><span class="ex-equip">Dumbbells · Incline Bench</span></td><td style="font-size:10px;color:var(--dim)">DB rack</td><td class="sets-cell">3 × 12–15<span class="sets-ph">Bicep long head peak</span></td><td class="rest-cell">75 sec</td><td class="note-cell"><strong>Arm hangs fully below shoulder.</strong> Maximum long head stretch at bottom of every rep. Best exercise for bicep peak development.</td></tr>
+        <tr><td class="ex-num">08</td><td><span class="ex-name">Hammer Curl</span><span class="ex-equip">Dumbbells</span></td><td style="font-size:10px;color:var(--dim)">DB rack</td><td class="sets-cell">3 × 12<span class="sets-ph">Brachialis + forearm</span></td><td class="rest-cell">60 sec</td><td class="note-cell"><strong>Neutral grip throughout.</strong> Builds brachialis which pushes the bicep up visually = bigger peak. Forearm thickness bonus.</td></tr>
+        <tr><td class="ex-num">09</td><td><span class="ex-name">Barbell or DB Shrugs</span><span class="ex-equip">Barbell or Heavy DBs</span></td><td style="font-size:10px;color:var(--dim)">Free weights</td><td class="sets-cell">4 × 15–20<span class="sets-ph">Upper trap — straight up</span></td><td class="rest-cell">60 sec</td><td class="note-cell"><strong>Straight up not circular.</strong> Hold 1–2s at top, full depression. Upper trap development = strong shoulder-neck aesthetic line.</td></tr>
+        <tr class="abs-row"><td class="ex-num" style="color:var(--acid)">ABS</td><td><span class="ex-name">Decline Sit-up + Russian Twist (Weighted)</span><span class="ex-equip">Decline Bench + 5–10kg Plate</span></td><td style="font-size:10px;color:var(--dim)">Decline bench</td><td class="sets-cell">3×15 + 3×20/side<span class="sets-ph">Obliques = waist taper</span></td><td class="rest-cell">45 sec</td><td class="note-cell"><strong>Decline sit-up:</strong> past parallel at bottom. <strong>Russian twist:</strong> feet off floor, touch plate each side, full rotation. Oblique work = visible waist narrowing.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="session-card open" id="cPullB">
+  <div class="color-bar cb-pull"></div>
+  <div class="session-head" onclick="toggle('cPullB')">
+    <div class="sh-main">
+      <div class="sh-letter" style="color:var(--orange)">B</div>
+      <div class="sh-info"><div class="sh-day-tag">FRIDAY · PULL B</div><div class="sh-name">MID-BACK + BICEP PEAK</div><div class="sh-muscles">Rhomboids · Mid-Traps · Rear Delts · Biceps · Brachialis</div></div>
+      <div class="sh-right"><div class="sh-dur">75–85 MIN</div><div class="sh-count">10 EXERCISES</div><div class="sh-toggle">▾</div></div>
+    </div>
+  </div>
+  <div class="ex-body">
+    <div class="phase-strip"><div class="phase-pill">WARM-UP: 7 MIN ELLIPTICAL + FACE PULLS × 20 + BAND ROWS × 15</div><div class="phase-pill act">HORIZONTAL PULL + REAR DELT FOCUS · BICEP PEAK SESSION</div></div>
+    <table class="ex-table">
+      <thead><tr><th>#</th><th>EXERCISE</th><th>EQUIPMENT</th><th>SETS × REPS</th><th>REST</th><th>COACHING CUE</th></tr></thead>
+      <tbody>
+        <tr><td class="ex-num">01</td><td><span class="ex-name">T-Bar Row</span><span class="ex-equip">T-Bar Row Machine or Landmine</span></td><td style="font-size:10px;color:var(--dim)">T-bar station</td><td class="sets-cell">4 × 6–8<span class="sets-ph">Heaviest back movement</span></td><td class="rest-cell">2–3 min</td><td class="note-cell"><strong>Chest on pad.</strong> Neutral grip. Pull to lower sternum. Best mid-back thickness builder. Go as heavy as strict form allows.</td></tr>
+        <tr><td class="ex-num">02</td><td><span class="ex-name">Chest-Supported DB Row</span><span class="ex-equip">Incline Bench + Dumbbells</span></td><td style="font-size:10px;color:var(--dim)">DB rack</td><td class="sets-cell">4 × 10–12<span class="sets-ph">No lower back fatigue</span></td><td class="rest-cell">90 sec</td><td class="note-cell"><strong>Lie face-down on incline bench.</strong> Completely removes lower back. Full ROM — let arms hang, drive elbows fully back. Heavy and safe.</td></tr>
+        <tr><td class="ex-num">03</td><td><span class="ex-name">Wide-Grip Seated Cable Row</span><span class="ex-equip">Cable Machine · Wide/Lat Bar</span></td><td style="font-size:10px;color:var(--dim)">Cable station</td><td class="sets-cell">4 × 10–12<span class="sets-ph">Upper back + rear delt</span></td><td class="rest-cell">90 sec</td><td class="note-cell"><strong>Elbows flared out at 45°.</strong> Pull to upper sternum. Hits upper back and rear delts differently from close-grip. Full stretch forward.</td></tr>
+        <tr><td class="ex-num">04</td><td><span class="ex-name">Reverse Pec Deck (Rear Delt Fly)</span><span class="ex-equip">Pec Deck Machine (reversed)</span></td><td style="font-size:10px;color:var(--dim)">Machine area</td><td class="sets-cell">4 × 15–20<span class="sets-ph">+drop set final</span></td><td class="rest-cell">60 sec</td><td class="note-cell"><strong>Face pad, arms forward.</strong> Fly out to sides. Pure rear delt isolation. Drop final set 25%, do 12 more. Critical for 3D shoulder look. <span class="ttag tt-ds">DROP SET</span></td></tr>
+        <tr><td class="ex-num">05</td><td><span class="ex-name">Neutral-Grip Lat Pulldown</span><span class="ex-equip">Cable Machine · V-Handle or Neutral Bar</span></td><td style="font-size:10px;color:var(--dim)">Cable pulldown</td><td class="sets-cell">3 × 12–15<span class="sets-ph">Lower lat focus</span></td><td class="rest-cell">75 sec</td><td class="note-cell"><strong>Palms facing each other.</strong> Pull to chin. Targets lower lat insertion differently from wide grip. Full arm extension mandatory.</td></tr>
+        <tr><td class="ex-num">06</td><td><span class="ex-name">Preacher Curl (EZ Bar)</span><span class="ex-equip">Preacher Bench + EZ Bar</span></td><td style="font-size:10px;color:var(--dim)">Preacher station</td><td class="sets-cell">4 × 10–12<span class="sets-ph">Short head fullness</span></td><td class="rest-cell">75 sec</td><td class="note-cell"><strong>Locks out all momentum.</strong> Full ROM at top and bottom. Best for bicep short head and overall fullness. EZ bar easier on wrists.</td></tr>
+        <tr><td class="ex-num">07</td><td><span class="ex-name">Cable Curl (Both Arms)</span><span class="ex-equip">Cable Machine · EZ or Straight Bar</span></td><td style="font-size:10px;color:var(--dim)">Cable station</td><td class="sets-cell">3 × 12–15<span class="sets-ph">Constant tension</span></td><td class="rest-cell">60 sec</td><td class="note-cell"><strong>Cable maintains tension at bottom</strong> unlike dumbbells. Curl fully, full supination at top. Squeeze hard. Don't lean back.</td></tr>
+        <tr><td class="ex-num">08</td><td><span class="ex-name">Concentration Curl</span><span class="ex-equip">Dumbbell</span></td><td style="font-size:10px;color:var(--dim)">DB rack</td><td class="sets-cell">3 × 12/arm<span class="sets-ph">Peak contraction finisher</span></td><td class="rest-cell">45 sec</td><td class="note-cell"><strong>Elbow braced on inner thigh.</strong> Full supination at top — rotate thumb outward. Best peak contraction exercise for biceps. Slow and deliberate.</td></tr>
+        <tr><td class="ex-num">09</td><td><span class="ex-name">Rear Delt Cable Fly + Face Pull</span><span class="ex-equip">Cable Machine · Two Low Pulleys</span></td><td style="font-size:10px;color:var(--dim)">Cable station</td><td class="sets-cell">3 × 15 each<span class="sets-ph">Superset both movements</span></td><td class="rest-cell">45 sec</td><td class="note-cell"><strong>Cross cables in centre, pull out wide.</strong> Immediately follow with face pull. Double rear delt hit. Shoulder health + 3D capping. <span class="ttag tt-ss">SUPERSET</span></td></tr>
+        <tr class="abs-row"><td class="ex-num" style="color:var(--acid)">ABS</td><td><span class="ex-name">Hanging Knee Raise + Oblique Crunches</span><span class="ex-equip">Pull-up Bar + Mat</span></td><td style="font-size:10px;color:var(--dim)">Bar + floor</td><td class="sets-cell">3×15 + 3×20/side<span class="sets-ph">Lower abs + obliques</span></td><td class="rest-cell">45 sec</td><td class="note-cell"><strong>Knee raise:</strong> curl hips toward chest. <strong>Oblique crunch:</strong> elbow to opposite knee, full trunk rotation. Two key waist-narrowing movements.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</div>
+<div class="cardio-block"><div class="cb-title">// POST-PULL CARDIO (BOTH PULL DAYS)</div><div class="cb-text"><strong>15 min rowing machine or stationary bike</strong> after Pull sessions. Rowing machine = bonus back pump + cardiovascular work simultaneously. Target HR 130–145 BPM. Zero interference with back recovery.</div></div>
+</div>
+
+<!-- LEGS -->
+<div id="view-legs" class="view">
+<div class="sessions-wrap">
+
+<div class="session-card open" id="cLegsA">
+  <div class="color-bar cb-legs"></div>
+  <div class="session-head" onclick="toggle('cLegsA')">
+    <div class="sh-main">
+      <div class="sh-letter" style="color:var(--acid2)">A</div>
+      <div class="sh-info"><div class="sh-day-tag">WEDNESDAY · LEGS A</div><div class="sh-name">QUAD-DOMINANT LEGS</div><div class="sh-muscles">Quads · Glutes · Hamstrings · Adductors · Calves</div></div>
+      <div class="sh-right"><div class="sh-dur">85–90 MIN</div><div class="sh-count">10 EXERCISES</div><div class="sh-toggle">▾</div></div>
+    </div>
+  </div>
+  <div class="ex-body">
+    <div class="phase-strip"><div class="phase-pill">WARM-UP: 8 MIN BIKE + LEG SWINGS + GOBLET SQUAT × 15 LIGHT</div><div class="phase-pill act">SQUAT PATTERN PRIMARY · QUAD + GLUTE EMPHASIS</div></div>
+    <table class="ex-table">
+      <thead><tr><th>#</th><th>EXERCISE</th><th>EQUIPMENT</th><th>SETS × REPS</th><th>REST</th><th>COACHING CUE</th></tr></thead>
+      <tbody>
+        <tr><td class="ex-num">01</td><td><span class="ex-name">Barbell Back Squat</span><span class="ex-equip">Barbell + Squat Rack</span></td><td style="font-size:10px;color:var(--dim)">Squat rack</td><td class="sets-cell">4 × 5–7<span class="sets-ph">King of all exercises</span></td><td class="rest-cell">3 min</td><td class="note-cell"><strong>High bar, shoulder-width stance.</strong> Depth to below parallel. Brace 360°, knees track over toes. Non-negotiable foundation exercise.</td></tr>
+        <tr><td class="ex-num">02</td><td><span class="ex-name">Hack Squat Machine</span><span class="ex-equip">Hack Squat Machine</span></td><td style="font-size:10px;color:var(--dim)">Machine area</td><td class="sets-cell">4 × 8–10<span class="sets-ph">Quad mass builder</span></td><td class="rest-cell">2 min</td><td class="note-cell"><strong>Feet low and close = max quad activation.</strong> Full ROM. No lockout at top. Hack squat builds quad sweep and teardrop more than anything else.</td></tr>
+        <tr><td class="ex-num">03</td><td><span class="ex-name">Leg Press (Low Narrow Feet)</span><span class="ex-equip">45° Leg Press Machine</span></td><td style="font-size:10px;color:var(--dim)">Machine area</td><td class="sets-cell">4 × 10–12<span class="sets-ph">+drop set final</span></td><td class="rest-cell">2 min</td><td class="note-cell"><strong>Feet low and narrow = quad bias.</strong> Don't lock knees. Deep ROM. Drop set final: drop 20%, do 10 more with full range. <span class="ttag tt-ds">DROP SET</span></td></tr>
+        <tr><td class="ex-num">04</td><td><span class="ex-name">Bulgarian Split Squat</span><span class="ex-equip">Dumbbells + Flat Bench</span></td><td style="font-size:10px;color:var(--dim)">DB rack + bench</td><td class="sets-cell">3 × 10/leg<span class="sets-ph">Unilateral balance</span></td><td class="rest-cell">90 sec</td><td class="note-cell"><strong>Rear foot elevated 40cm.</strong> Vertical torso = quad, lean forward = glute. Most effective unilateral lower body exercise for aesthetics.</td></tr>
+        <tr><td class="ex-num">05</td><td><span class="ex-name">Leg Extension Machine</span><span class="ex-equip">Leg Extension Machine</span></td><td style="font-size:10px;color:var(--dim)">Machine area</td><td class="sets-cell">4 × 15<span class="sets-ph">+myo-reps final</span></td><td class="rest-cell">60 sec</td><td class="note-cell"><strong>Pause 2s at full extension.</strong> Final myo-rep: 15 reps, rest 10s, 5, rest 10s, 5, rest 10s, 5. Incredible quad development from the stretch. <span class="ttag tt-myo">MYO-REPS</span></td></tr>
+        <tr><td class="ex-num">06</td><td><span class="ex-name">Lying Leg Curl</span><span class="ex-equip">Leg Curl Machine</span></td><td style="font-size:10px;color:var(--dim)">Machine area</td><td class="sets-cell">4 × 12–15<span class="sets-ph">Point toes down</span></td><td class="rest-cell">75 sec</td><td class="note-cell"><strong>Toes pointed down = bicep femoris bias.</strong> Full extension at start, full curl at end. Don't let hips rise off pad on each rep.</td></tr>
+        <tr><td class="ex-num">07</td><td><span class="ex-name">Hip Adductor Machine</span><span class="ex-equip">Hip Adductor Machine</span></td><td style="font-size:10px;color:var(--dim)">Machine area</td><td class="sets-cell">3 × 15–20<span class="sets-ph">Inner thigh + glute tie-in</span></td><td class="rest-cell">60 sec</td><td class="note-cell"><strong>Underrated for aesthetics.</strong> Strong adductors = better squat, fuller inner thigh appearance. Slow, controlled. No swinging.</td></tr>
+        <tr><td class="ex-num">08</td><td><span class="ex-name">Smith Machine Calf Raise</span><span class="ex-equip">Smith Machine + Calf Block</span></td><td style="font-size:10px;color:var(--dim)">Smith machine</td><td class="sets-cell">5 × 15–20<span class="sets-ph">Full stretch mandatory</span></td><td class="rest-cell">45 sec</td><td class="note-cell"><strong>Full stretch at bottom — 2s pause.</strong> Full contraction at top — 1s pause. Calves respond to high volume + full ROM only. Don't shorten ROM.</td></tr>
+        <tr class="abs-row"><td class="ex-num" style="color:var(--acid)">ABS</td><td><span class="ex-name">Cable Crunch + Reverse Crunch</span><span class="ex-equip">Cable Machine + Mat</span></td><td style="font-size:10px;color:var(--dim)">Cable + floor</td><td class="sets-cell">3×15 + 3×15<span class="sets-ph">Upper + lower abs</span></td><td class="rest-cell">45 sec</td><td class="note-cell"><strong>Cable crunch:</strong> round spine fully down, squeeze abs at bottom. <strong>Reverse crunch:</strong> bring knees to chest, curl hips off floor at top. Waist compression work.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="session-card open" id="cLegsB">
+  <div class="color-bar cb-legs"></div>
+  <div class="session-head" onclick="toggle('cLegsB')">
+    <div class="sh-main">
+      <div class="sh-letter" style="color:var(--yellow)">B</div>
+      <div class="sh-info"><div class="sh-day-tag">SATURDAY · LEGS B</div><div class="sh-name">POSTERIOR CHAIN</div><div class="sh-muscles">Hamstrings · Glutes · Lower Back · Abductors · Calves</div></div>
+      <div class="sh-right"><div class="sh-dur">85–90 MIN</div><div class="sh-count">10 EXERCISES</div><div class="sh-toggle">▾</div></div>
+    </div>
+  </div>
+  <div class="ex-body">
+    <div class="phase-strip"><div class="phase-pill">WARM-UP: 8 MIN TREADMILL + HIP CIRCLES + GLUTE BRIDGE × 20 BW</div><div class="phase-pill act">HINGE PATTERN PRIMARY · GLUTE + HAMSTRING DOMINANCE</div></div>
+    <table class="ex-table">
+      <thead><tr><th>#</th><th>EXERCISE</th><th>EQUIPMENT</th><th>SETS × REPS</th><th>REST</th><th>COACHING CUE</th></tr></thead>
+      <tbody>
+        <tr><td class="ex-num">01</td><td><span class="ex-name">Conventional Deadlift</span><span class="ex-equip">Barbell + Plates</span></td><td style="font-size:10px;color:var(--dim)">Free weights area</td><td class="sets-cell">4 × 4–6<span class="sets-ph">Most anabolic movement</span></td><td class="rest-cell">3 min</td><td class="note-cell"><strong>Brace 360° before every rep.</strong> Bar over mid-foot, hip hinge, drive floor away. Most testosterone-boosting, anabolic exercise. Respect it.</td></tr>
+        <tr><td class="ex-num">02</td><td><span class="ex-name">Romanian Deadlift</span><span class="ex-equip">Barbell or Heavy DBs</span></td><td style="font-size:10px;color:var(--dim)">Free weights</td><td class="sets-cell">4 × 8–10<span class="sets-ph">Hamstring stretch loading</span></td><td class="rest-cell">2 min</td><td class="note-cell"><strong>Feel hamstring stretch at bottom.</strong> Don't touch floor — maintain tension. Soft knees, neutral spine. Best hamstring mass builder.</td></tr>
+        <tr><td class="ex-num">03</td><td><span class="ex-name">Barbell Hip Thrust</span><span class="ex-equip">Barbell + Flat Bench + Pad</span></td><td style="font-size:10px;color:var(--dim)">Bench + barbell</td><td class="sets-cell">4 × 10–12<span class="sets-ph">Glute king — pause at top</span></td><td class="rest-cell">2 min</td><td class="note-cell"><strong>Shoulders on bench, bar over hips.</strong> Drive through heels. Posterior pelvic tilt at top. <strong>Pause 1–2s squeezing glutes hard</strong>. Most effective glute exercise.</td></tr>
+        <tr><td class="ex-num">04</td><td><span class="ex-name">Seated Leg Curl</span><span class="ex-equip">Seated Leg Curl Machine</span></td><td style="font-size:10px;color:var(--dim)">Machine area</td><td class="sets-cell">4 × 12–15<span class="sets-ph">Better stretch than lying</span></td><td class="rest-cell">75 sec</td><td class="note-cell"><strong>Seated version stretches hamstring more at start.</strong> More muscle damage = more growth. Full ROM. Superset with stiff-leg. <span class="ttag tt-ss">SUPERSET</span></td></tr>
+        <tr><td class="ex-num">05</td><td><span class="ex-name">Cable Glute Kickback</span><span class="ex-equip">Cable Machine · Ankle Strap</span></td><td style="font-size:10px;color:var(--dim)">Cable station</td><td class="sets-cell">3 × 15/leg<span class="sets-ph">Glute isolation</span></td><td class="rest-cell">60 sec</td><td class="note-cell"><strong>Slight forward lean, brace core.</strong> Kick back and slightly upward. Squeeze glute at top position. Pure posterior glute isolation.</td></tr>
+        <tr><td class="ex-num">06</td><td><span class="ex-name">Walking Lunges (DB)</span><span class="ex-equip">Dumbbells · Open Floor</span></td><td style="font-size:10px;color:var(--dim)">Turf / open floor</td><td class="sets-cell">3 × 12/leg<span class="sets-ph">Step long = glute bias</span></td><td class="rest-cell">90 sec</td><td class="note-cell"><strong>Long stride for glute emphasis.</strong> Upright torso. DBs at sides. Excellent unilateral glute + quad functional movement. Add weight weekly.</td></tr>
+        <tr><td class="ex-num">07</td><td><span class="ex-name">Hip Abductor Machine</span><span class="ex-equip">Hip Abductor Machine</span></td><td style="font-size:10px;color:var(--dim)">Machine area</td><td class="sets-cell">4 × 20<span class="sets-ph">Glute medius — upper shelf</span></td><td class="rest-cell">60 sec</td><td class="note-cell"><strong>Glute medius = upper glute shelf.</strong> Push out against resistance, sit tall. Creates the lateral glute curve that makes legs look athletic and powerful.</td></tr>
+        <tr><td class="ex-num">08</td><td><span class="ex-name">Seated Calf Raise Machine</span><span class="ex-equip">Seated Calf Raise Machine</span></td><td style="font-size:10px;color:var(--dim)">Machine area</td><td class="sets-cell">5 × 20<span class="sets-ph">Soleus — inner calf depth</span></td><td class="rest-cell">45 sec</td><td class="note-cell"><strong>Bent knee = soleus dominant.</strong> Full stretch 2s, full contraction 1s. Soleus gives calves their thickness when viewed from the side.</td></tr>
+        <tr class="abs-row"><td class="ex-num" style="color:var(--acid)">ABS</td><td><span class="ex-name">GHD Sit-up + Dead Bug</span><span class="ex-equip">GHD Machine + Mat</span></td><td style="font-size:10px;color:var(--dim)">GHD + floor</td><td class="sets-cell">3×12 + 3×10/side<span class="sets-ph">Full core stability</span></td><td class="rest-cell">45 sec</td><td class="note-cell"><strong>GHD sit-up:</strong> full hyperextension back (builds up slowly). <strong>Dead bug:</strong> opposite arm + leg extend fully, lower back pressed to floor the entire time. Deep core stability.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</div>
+<div class="cardio-block"><div class="cb-title">// POST-LEGS CARDIO</div><div class="cb-text"><strong>Skip hard cardio after leg sessions.</strong> High-volume leg training taxes the CNS heavily. Instead: <strong>10 min easy treadmill walk</strong> (speed 4 km/h, flat grade) for active recovery and blood flow to legs. Save full cardio sessions for push/pull days.</div></div>
+</div>
+
+<!-- WAIST -->
+<div id="view-waist" class="view">
+  <div class="sec-pad"><div class="sec-tag">// 35 Inch → 30–31 Inch Target</div><div class="sec-h2">Waist Reduction Protocol</div><div class="sec-sub">At 35 inches with 28% BF, fat loss does the heavy lifting — but targeted core strengthens the transverse abdominis which acts as a natural corset, creating a tighter waist even before fat is fully lost.</div></div>
+  <div class="sec-rule"></div>
+  <div style="padding:20px 40px 0;"><div class="sec-tag">// Projection by Week</div></div>
+  <div style="padding:10px 40px 0;">
+    <div class="waist-track">
+      <div class="wt-cell"><div class="wt-week">NOW</div><div class="wt-val">35<span class="wt-unit">in</span></div><div class="wt-bar"><div class="wt-fill" style="width:100%"></div></div><div class="wt-note">Start · ~28% BF</div></div>
+      <div class="wt-cell"><div class="wt-week">WEEK 4</div><div class="wt-val">34<span class="wt-unit">in</span></div><div class="wt-bar"><div class="wt-fill" style="width:93%"></div></div><div class="wt-note">Water + early fat loss</div></div>
+      <div class="wt-cell"><div class="wt-week">WEEK 8</div><div class="wt-val">33<span class="wt-unit">in</span></div><div class="wt-bar"><div class="wt-fill" style="width:84%"></div></div><div class="wt-note">Visible belt change</div></div>
+      <div class="wt-cell"><div class="wt-week">WEEK 12</div><div class="wt-val">32<span class="wt-unit">in</span></div><div class="wt-bar"><div class="wt-fill" style="width:74%"></div></div><div class="wt-note">Significant slimming</div></div>
+      <div class="wt-cell"><div class="wt-week">WEEK 20</div><div class="wt-val">31<span class="wt-unit">in</span></div><div class="wt-bar"><div class="wt-fill" style="width:62%"></div></div><div class="wt-note">Near target range</div></div>
+      <div class="wt-cell"><div class="wt-week">WEEK 28</div><div class="wt-val">30<span class="wt-unit">in</span></div><div class="wt-bar"><div class="wt-fill" style="width:50%"></div></div><div class="wt-note">🎯 Goal achieved</div></div>
+    </div>
+  </div>
+  <div class="sessions-wrap" style="margin-top:20px;">
+  <div class="session-card open" id="cAbs">
+    <div class="color-bar" style="background:linear-gradient(90deg,var(--acid),var(--teal))"></div>
+    <div class="session-head" onclick="toggle('cAbs')">
+      <div class="sh-main">
+        <div class="sh-letter" style="color:var(--acid2)">C</div>
+        <div class="sh-info"><div class="sh-day-tag">EVERY SESSION FINISHER · 10–12 MIN</div><div class="sh-name">WAIST COMPRESSION CORE PROTOCOL</div><div class="sh-muscles">Rectus Abdominis · Transverse Abdominis · Obliques · Serratus Anterior</div></div>
+        <div class="sh-right"><div class="sh-dur">10–12 MIN</div><div class="sh-count">ROTATE EXERCISES</div><div class="sh-toggle">▾</div></div>
+      </div>
+    </div>
+    <div class="ex-body">
+      <div class="phase-strip"><div class="phase-pill act">PICK 2–3 OF THESE EACH SESSION · ROTATE DAILY · PROGRESSIVE OVERLOAD ON ABS</div></div>
+      <table class="ex-table">
+        <thead><tr><th>#</th><th>EXERCISE</th><th>EQUIPMENT</th><th>SETS × REPS</th><th>REST</th><th>WAIST BENEFIT</th></tr></thead>
+        <tbody>
+          <tr><td class="ex-num" style="color:var(--acid)">C1</td><td><span class="ex-name">Weighted Cable Crunch</span><span class="ex-equip">Cable Machine · Rope</span></td><td style="font-size:10px;color:var(--dim)">Cable station</td><td class="sets-cell">3 × 15–20<span class="sets-ph">Add weight weekly</span></td><td class="rest-cell">45 sec</td><td class="note-cell"><strong>Progressive overload on abs = real results.</strong> Round spine fully down. Neck stays neutral. Hold peak contraction 1s. Best weighted ab exercise.</td></tr>
+          <tr><td class="ex-num" style="color:var(--acid)">C2</td><td><span class="ex-name">Hanging Leg Raise</span><span class="ex-equip">Pull-up Bar</span></td><td style="font-size:10px;color:var(--dim)">Pull-up station</td><td class="sets-cell">3 × 12–15<span class="sets-ph">Add ankle weights later</span></td><td class="rest-cell">60 sec</td><td class="note-cell"><strong>Curl hips toward chest</strong> — not just legs up. Posterior pelvic tilt at top. Best lower ab exercise. No kipping or swinging.</td></tr>
+          <tr><td class="ex-num" style="color:var(--acid)">C3</td><td><span class="ex-name">Ab Wheel Rollout</span><span class="ex-equip">Ab Wheel</span></td><td style="font-size:10px;color:var(--dim)">Floor area</td><td class="sets-cell">3 × 8–12<span class="sets-ph">Build to full extension</span></td><td class="rest-cell">60 sec</td><td class="note-cell"><strong>Hardest ab exercise.</strong> Maximum transverse abdominis activation = the muscle that literally compresses your waist like a corset. Build to full extension over weeks.</td></tr>
+          <tr><td class="ex-num" style="color:var(--acid)">C4</td><td><span class="ex-name">Russian Twist (Weighted Plate)</span><span class="ex-equip">5–10kg Weight Plate + Mat</span></td><td style="font-size:10px;color:var(--dim)">Mat</td><td class="sets-cell">3 × 20/side<span class="sets-ph">Feet off floor</span></td><td class="rest-cell">45 sec</td><td class="note-cell"><strong>Full rotation each side.</strong> Tap plate to floor. Oblique development = waist narrowing from the sides. V-taper appearance. No side bends — those widen the waist.</td></tr>
+          <tr><td class="ex-num" style="color:var(--acid)">C5</td><td><span class="ex-name">RKC Plank + Side Plank</span><span class="ex-equip">Mat</span></td><td style="font-size:10px;color:var(--dim)">Floor area</td><td class="sets-cell">2×45s + 2×40s each<span class="sets-ph">Isometric compression</span></td><td class="rest-cell">30 sec</td><td class="note-cell"><strong>RKC plank:</strong> pull elbows toward toes, squeeze every muscle. <strong>Side plank:</strong> hip high, oblique under constant tension. Natural waist corseting effect.</td></tr>
+          <tr><td class="ex-num" style="color:var(--acid)">C6</td><td><span class="ex-name">Decline Weighted Sit-up</span><span class="ex-equip">Decline Bench + 5–10kg Plate</span></td><td style="font-size:10px;color:var(--dim)">Decline bench</td><td class="sets-cell">3 × 15<span class="sets-ph">3s eccentric</span></td><td class="rest-cell">45 sec</td><td class="note-cell"><strong>Go past parallel at bottom.</strong> Hold plate at chest. 3s slow descent. Progressive loading on abs = actual muscle development, not just endurance.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  </div>
+  <div class="cardio-block" style="margin-top:0;"><div class="cb-title">// THE 3 REAL LEVERS FOR WAIST REDUCTION</div><div class="cb-text"><strong>1. Fat loss = 80%.</strong> Most of the 35-inch measurement is subcutaneous abdominal fat. The nutrition cut removes this — no exercise can spot-reduce it directly.<br><br><strong>2. Core training = 20%.</strong> Ab wheel and cable crunches build the TVA (transverse abdominis) — the deepest core muscle that acts like a natural weight belt pulling the waist in.<br><br><strong>3. Avoid heavy side bends.</strong> Weighted oblique side bends build the external obliques wider — this WIDENS the waist. Do Russian twists (rotation) instead of side bends (lateral flexion).</div></div>
+</div>
+
+<!-- PROGRESSION -->
+<div id="view-progression" class="view">
+  <div class="sec-pad"><div class="sec-tag">// The Rules That Determine Everything</div><div class="sec-h2">Progression Framework</div><div class="sec-sub">How to load, manage fatigue, and adapt across 32 weeks. Follow these and you will make consistent progress. Ignore them and plateau.</div></div>
+  <div class="sec-rule"></div>
+  <div style="padding:20px 40px 0;">
+    <ul class="prog-list">
+      <li class="prog-item"><div class="pi-var">DOUBLE PROGRESSION</div><div class="pi-val">Increase reps to the <strong>top of the range on all sets first</strong>. Then add 2.5–5kg and drop to the bottom of the range. Example: 4×8 → 4×10 → add weight → 4×8 again. Most sustainable overload system.</div></li>
+      <li class="prog-item"><div class="pi-var">COMPOUND LOADING</div><div class="pi-val">Add <strong>5kg to lower body compounds</strong> (squat, deadlift, hip thrust) when target reps are hit. Add <strong>2.5kg to upper body compounds</strong> (bench, row, OHP). Use micro plates — they exist for a reason.</div></li>
+      <li class="prog-item"><div class="pi-var">ACCESSORY LOADING</div><div class="pi-val">Add <strong>1 rep per set per session</strong> until top of range across all sets. Then add the smallest weight increment. Accessories = volume first, then load.</div></li>
+      <li class="prog-item"><div class="pi-var">DELOAD (EVERY 4TH WK)</div><div class="pi-val"><strong>Reduce volume 40%</strong> — 3 sets instead of 4–5. Keep the same working weight. Do not reduce intensity. This is when muscle growth actually consolidates. Do not skip this.</div></li>
+      <li class="prog-item"><div class="pi-var">PHASE SETS × REPS</div><div class="pi-val"><strong>Wk 1–4:</strong> 3×12–15 RPE 6–7 (adaptation). <strong>Wk 5–8/13–16:</strong> 4×8–12 RPE 7–8 (hypertrophy). <strong>Wk 9–12:</strong> 5×3–6 RPE 8–9 (strength). <strong>Wk 17+:</strong> 4×10–12 with drop sets and supersets.</div></li>
+      <li class="prog-item"><div class="pi-var">DROP SETS</div><div class="pi-val">Final set only. Immediately reduce weight 20–25%, do 8–10 more reps without rest. Extend the set past normal failure. Maximum metabolic stress. Use sparingly — 1 exercise per session maximum.</div></li>
+      <li class="prog-item"><div class="pi-var">SUPERSETS</div><div class="pi-val">Back-to-back exercises with minimal rest (15–30s). Best used for antagonist pairs (bicep + tricep, chest fly + rear delt) or same-muscle accessories. Saves time and increases density.</div></li>
+      <li class="prog-item"><div class="pi-var">MYO-REPS</div><div class="pi-val">Do 20 activating reps, rest 10s, do 5 reps, rest 10s, do 5 reps, repeat 3–5 clusters. Same high-effort stimulus as 3 additional sets in a fraction of the time. Best for isolation exercises.</div></li>
+      <li class="prog-item"><div class="pi-var">SESSION LOG</div><div class="pi-val">Record every set: <strong>exercise, weight used, reps completed, RPE</strong>. Phone notes app minimum. This is the single biggest differentiator between people who progress and people who plateau indefinitely.</div></li>
+      <li class="prog-item"><div class="pi-var">MORNING WARM-UP</div><div class="pi-val"><strong>7–8 minutes mandatory</strong> before every session. Cold joints + heavy compounds = injury risk. Treadmill 5 min + 2 warm-up sets of first exercise at 50%, then 70% of working weight. Never skip.</div></li>
+      <li class="prog-item"><div class="pi-var">RPE SCALE</div><div class="pi-val"><strong>RPE 6</strong> = 4 reps in reserve. <strong>RPE 7</strong> = 3 in reserve. <strong>RPE 8</strong> = 2 in reserve. <strong>RPE 9</strong> = 1 in reserve. <strong>RPE 10</strong> = failure. Target RPE 7–9 for all working sets. Below 7 = not stimulating enough.</div></li>
+      <li class="prog-item"><div class="pi-var">WAIST TRACKING</div><div class="pi-val">Measure waist <strong>every 2 weeks, morning before food</strong>, navel level, relaxed. Target: Week 4 ~34in → Week 8 ~33in → Week 16 ~32in → Week 24 ~31in → Week 28 ~30in. Track alongside weekly weight average.</div></li>
+    </ul>
+  </div>
+</div>
+
+<div class="footer">
+  <div class="ft-brand">FORGE</div>
+  <div class="ft-note">HYPERTROPHY GYM · BACHUPALLY, HYDERABAD<br>VISHNU TEJA · 107KG · 35IN → 30IN · 28% BF<br>6 SESSIONS/WEEK · 75–90 MIN · PPL ×2</div>
+</div>
+
+<script>
+function switchView(id, btn) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('view-' + id).classList.add('active');
+  btn.classList.add('active');
+  window.scrollTo({top: 56, behavior: 'smooth'});
+}
+function toggle(id) {
+  document.getElementById(id).classList.toggle('open');
+}
+</script>
+</body>
+</html>
