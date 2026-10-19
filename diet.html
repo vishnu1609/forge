@@ -1,0 +1,628 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#020205">
+<title>FORGE Diet Plan</title>
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/icon-32.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Space+Grotesk:wght@400;500;600&display=swap">
+<style>
+:root {
+  --bg: #020205;
+  --surface: #0a1020;
+  --card: #0d1528;
+  --border: rgba(0,212,255,0.12);
+  --acid: #00D4FF;
+  --acid-dim: rgba(0,212,255,0.15);
+  --green: #22c55e;
+  --orange: #f59e0b;
+  --red: #ef4444;
+  --violet: #a78bfa;
+  --bright: #e8edf5;
+  --dim: rgba(255,255,255,0.55);
+  --muted: rgba(255,255,255,0.3);
+  color-scheme: dark;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { background: var(--bg); padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+body {
+  background: var(--bg);
+  color: var(--bright);
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0;
+  line-height: 1.5;
+  max-width: 900px;
+  margin: 0 auto;
+  -webkit-text-size-adjust: 100%;
+}
+h1, h2, h3 { font-family: 'Barlow Condensed', sans-serif; text-transform: uppercase; letter-spacing: 3px; text-wrap: balance; }
+.mono { font-family: 'Barlow Condensed', sans-serif; }
+
+.topbar { display: flex; justify-content: space-between; align-items: center; padding: 16px 0 0; }
+.topbar a { color: var(--acid); text-decoration: none; font-family: 'Barlow Condensed', sans-serif; letter-spacing: 2px; font-size: 13px; font-weight: 600; }
+
+.header { text-align: center; padding: 24px 0 20px; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+.header h1 { font-size: 42px; font-weight: 900; color: var(--acid); letter-spacing: 8px; }
+.header .sub { font-size: 11px; color: var(--dim); letter-spacing: 4px; margin-top: 6px; font-family: 'Barlow Condensed', sans-serif; text-transform: uppercase; }
+
+.phase-tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 16px; scrollbar-width: thin; -webkit-overflow-scrolling: touch; }
+.phase-tab {
+  flex: 0 0 auto; background: var(--card); border: 1px solid var(--border); color: var(--dim);
+  border-radius: 6px; padding: 8px 12px; cursor: pointer; text-align: left;
+  font-family: 'Barlow Condensed', sans-serif; letter-spacing: 1px;
+}
+.phase-tab .pt-num { font-size: 10px; color: var(--muted); letter-spacing: 2px; }
+.phase-tab .pt-name { font-size: 14px; font-weight: 700; text-transform: uppercase; }
+.phase-tab .pt-cal { font-size: 11px; color: var(--muted); }
+.phase-tab.active { border-color: var(--acid); background: var(--acid-dim); color: var(--bright); }
+.phase-tab.active .pt-cal, .phase-tab.active .pt-num { color: var(--acid); }
+
+.phase-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 12px; }
+.phase-head h2 { font-size: 24px; color: var(--bright); }
+.tag { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; letter-spacing: 2px; padding: 2px 8px; border-radius: 3px; font-weight: 700; }
+.tag-deficit { background: rgba(239,68,68,0.15); color: var(--red); }
+.tag-maint { background: rgba(0,212,255,0.15); color: var(--acid); }
+.tag-surplus { background: rgba(34,197,94,0.15); color: var(--green); }
+.phase-note { font-size: 13px; color: var(--dim); background: var(--surface); border-left: 2px solid var(--acid); padding: 10px 12px; border-radius: 0 6px 6px 0; margin-bottom: 20px; }
+.phase-note strong { color: var(--bright); font-weight: 500; }
+
+.profile-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-bottom: 24px; }
+.stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 12px; text-align: center; }
+.stat-card .val { font-family: 'Barlow Condensed', sans-serif; font-size: 28px; font-weight: 800; }
+.stat-card .label { font-size: 10px; color: var(--dim); letter-spacing: 2px; text-transform: uppercase; margin-top: 2px; }
+
+.section { margin-bottom: 36px; }
+.section > h2 { font-size: 18px; font-weight: 700; color: var(--acid); margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+
+.meal-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 12px; }
+.meal-card.extra { border-style: dashed; }
+.meal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px; }
+.meal-time { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 600; color: var(--acid); letter-spacing: 3px; background: var(--acid-dim); padding: 3px 10px; border-radius: 4px; }
+.meal-name { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 800; color: var(--bright); letter-spacing: 2px; text-transform: uppercase; }
+.new-badge { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; letter-spacing: 1.5px; color: var(--green); background: rgba(34,197,94,0.12); padding: 1px 6px; border-radius: 3px; margin-left: 6px; vertical-align: middle; }
+
+.items { width: 100%; border-collapse: collapse; font-size: 13px; }
+.items td { padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.04); color: var(--dim); vertical-align: top; }
+.items td.q { color: var(--bright); font-weight: 500; white-space: nowrap; padding-right: 12px; width: 1%; }
+.items td.k { text-align: right; color: var(--muted); white-space: nowrap; padding-left: 8px; font-size: 12px; }
+.items tr.new td.q, .items tr.new td.n { color: var(--green); }
+.item-note { display: block; font-size: 11px; color: var(--muted); font-style: italic; }
+
+.variant-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.variant { background: var(--surface); border-radius: 6px; padding: 12px; min-width: 0; }
+.variant-title { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; color: var(--acid); letter-spacing: 2px; margin-bottom: 6px; }
+
+.macro-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.06); }
+.macro-pill { text-align: center; padding: 6px 2px; border-radius: 6px; background: var(--surface); }
+.macro-pill .mv { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 700; }
+.macro-pill .ml { font-size: 9px; color: var(--dim); letter-spacing: 1px; text-transform: uppercase; }
+.mk { color: var(--bright); }
+.mp { color: var(--acid); }
+.mf { color: var(--orange); }
+.mc { color: var(--green); }
+.mfi { color: var(--violet); }
+
+.totals-card { background: linear-gradient(135deg, rgba(0,212,255,0.08), rgba(0,212,255,0.02)); border: 1px solid var(--acid); border-radius: 12px; padding: 20px; margin-bottom: 36px; }
+.totals-card h2 { font-size: 14px; letter-spacing: 3px; color: var(--acid); margin-bottom: 16px; text-align: center; }
+.totals-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); gap: 12px; text-align: center; }
+.total-item .tv { font-family: 'Barlow Condensed', sans-serif; font-size: 30px; font-weight: 900; }
+.total-item .tl { font-size: 10px; color: var(--dim); letter-spacing: 2px; text-transform: uppercase; }
+.total-item .tt { font-size: 10px; color: var(--muted); font-style: italic; }
+.totals-foot { font-size: 11px; color: var(--muted); text-align: center; margin-top: 14px; }
+
+table.data { width: 100%; border-collapse: collapse; font-size: 13px; }
+table.data th { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--acid); text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); font-weight: 600; white-space: nowrap; }
+table.data td { padding: 8px 10px; border-bottom: 1px solid rgba(255,255,255,0.04); color: var(--dim); }
+table.data td:first-child { color: var(--bright); }
+table.data tr.cur td { background: rgba(0,212,255,0.06); }
+.scroll-x { overflow-x: auto; }
+
+.badge { display: inline-block; font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; padding: 2px 8px; border-radius: 3px; font-weight: 600; font-family: 'Barlow Condensed', sans-serif; }
+.badge-safe { background: rgba(34,197,94,0.15); color: var(--green); }
+.badge-mod { background: rgba(245,158,11,0.15); color: var(--orange); }
+.badge-avoid { background: rgba(239,68,68,0.15); color: var(--red); }
+
+.rotation-grid, .recipe-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.rotation-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+.rotation-card h3 { font-size: 12px; color: var(--acid); margin-bottom: 8px; letter-spacing: 2px; }
+.rotation-card ul { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+.rotation-card li { font-size: 12px; color: var(--dim); }
+.rotation-card li strong { color: var(--bright); font-weight: 500; }
+
+details.recipe { background: var(--card); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; align-self: start; }
+details.recipe[open] { border-color: var(--acid); }
+details.recipe summary { padding: 14px; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 700; color: var(--bright); letter-spacing: 1px; text-transform: uppercase; -webkit-user-select: none; user-select: none; }
+details.recipe summary::-webkit-details-marker { display: none; }
+details.recipe summary::after { content: '+'; color: var(--acid); font-size: 20px; font-weight: 400; }
+details.recipe[open] summary::after { content: '\2212'; }
+.recipe-body { padding: 0 14px 14px; font-size: 12px; color: var(--dim); line-height: 1.6; }
+.r-tag { display: inline-block; font-size: 9px; letter-spacing: 1px; text-transform: uppercase; padding: 2px 6px; border-radius: 3px; font-family: 'Barlow Condensed', sans-serif; font-weight: 600; margin: 0 4px 8px 0; }
+.r-time { background: rgba(0,212,255,0.12); color: var(--acid); }
+.r-protein { background: rgba(34,197,94,0.12); color: var(--green); }
+.recipe-body ol { padding-left: 18px; display: flex; flex-direction: column; gap: 4px; }
+.r-tip { color: var(--orange); font-style: italic; margin-top: 6px; font-size: 11px; }
+
+.supps-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+.supp-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+.supp-card .sname { font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 700; color: var(--bright); letter-spacing: 1px; }
+.supp-card .sdose { font-size: 12px; color: var(--acid); margin-top: 2px; }
+.supp-card .swhy { font-size: 11px; color: var(--dim); margin-top: 4px; }
+
+.rules { display: flex; flex-direction: column; gap: 8px; }
+.rule { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; color: var(--dim); }
+.rule-icon { color: var(--acid); font-size: 14px; flex-shrink: 0; margin-top: 2px; }
+.rule strong { color: var(--bright); font-weight: 500; }
+
+.footer { text-align: center; padding: 32px 0; border-top: 1px solid var(--border); margin-top: 20px; }
+.footer p { font-size: 10px; color: var(--muted); letter-spacing: 3px; text-transform: uppercase; font-family: 'Barlow Condensed', sans-serif; }
+
+@media (max-width: 560px) {
+  .rotation-grid, .recipe-grid, .variant-grid { grid-template-columns: 1fr; }
+  .macro-row { grid-template-columns: repeat(5, 1fr); gap: 4px; }
+  .macro-pill .mv { font-size: 15px; }
+  .macro-pill .ml { font-size: 8px; letter-spacing: 0; }
+  .header h1 { font-size: 32px; letter-spacing: 5px; }
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="./">&larr; FORGE APP</a>
+  <span class="mono" style="font-size:11px;color:var(--muted);letter-spacing:2px;">TELANGANA KITCHEN</span>
+</div>
+
+<div class="header">
+  <h1>FORGE</h1>
+  <div class="sub">Nutrition Protocol · Winter Arc · 32 Weeks</div>
+  <div class="sub" style="color:var(--muted);">Vishnu Teja · 105 kg · 186 cm · 3 meals · low purine</div>
+</div>
+
+<nav class="phase-tabs" id="phaseTabs" aria-label="Phases"></nav>
+
+<div id="phaseView"></div>
+
+<div class="section">
+  <h2>All Phases at a Glance</h2>
+  <div class="scroll-x">
+    <table class="data" id="phaseTable">
+      <thead><tr><th>Phase</th><th>Weeks</th><th>Kcal</th><th>Protein</th><th>Fat</th><th>Carbs</th><th>Fibre</th><th>What changes</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="section">
+  <h2>Weekly Rotation — Telangana Style</h2>
+  <div class="rotation-grid">
+    <div class="rotation-card">
+      <h3>Kodi (Chicken) Styles</h3>
+      <ul>
+        <li><strong>Mon/Thu:</strong> Kodi kura (tomato-onion masala)</li>
+        <li><strong>Tue/Fri:</strong> Gongura kodi (sorrel leaf)</li>
+        <li><strong>Wed:</strong> Nalla karam kodi (black pepper dry fry)</li>
+        <li><strong>Sat:</strong> Karivepaku kodi (curry leaf dry fry)</li>
+      </ul>
+    </div>
+    <div class="rotation-card">
+      <h3>Millets / Grains</h3>
+      <ul>
+        <li><strong>Lunch:</strong> 1 jonna rotte or 1 sajja rotte (40g flour)</li>
+        <li><strong>Dinner:</strong> Ragi sangati (40g flour) or jonna rotte</li>
+        <li><strong>Pappu swap (cut phases):</strong> 3 days/week, 1 katori pappu instead of the lunch rotte</li>
+        <li><strong>Weekend:</strong> 2 pesarattu instead of the lunch rotte</li>
+      </ul>
+    </div>
+    <div class="rotation-card">
+      <h3>Kooralu — 150g per meal</h3>
+      <ul>
+        <li><strong>Fibre stars:</strong> Munagakaya, chikkudukaya, thotakura</li>
+        <li><strong>Daily:</strong> Bendakaya, dondakaya, beerakaya, sorakaya, vankaya, potlakaya</li>
+        <li><strong>Pachadis (1 tbsp):</strong> Gongura, tomato, allam</li>
+      </ul>
+    </div>
+    <div class="rotation-card">
+      <h3>Pandlu (Fruit) — 1 Serving</h3>
+      <ul>
+        <li><strong>Best:</strong> Jamakaya / guava, 100g (5.4g fibre)</li>
+        <li><strong>Alt:</strong> Battayi / pear, 150g (4.6g fibre)</li>
+        <li><strong>Alt:</strong> Danimma / pomegranate, 100g (4g fibre)</li>
+        <li><strong>Seasonal:</strong> Seethapalam / custard apple, 100g (4.4g fibre)</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>Quick Recipes — Tap to Expand</h2>
+  <div class="recipe-grid">
+
+    <details class="recipe">
+      <summary>Kodi Kura</summary>
+      <div class="recipe-body">
+        <span class="r-tag r-time">25 min</span><span class="r-tag r-protein">~79g protein / 350g raw</span>
+        <ol>
+          <li>Heat 1 tsp (5g) oil. Splutter mustard + cumin, add 1 onion (~80g), fry golden.</li>
+          <li>Add 1 tsp ginger-garlic paste + 2 slit green chillies, fry 1 min.</li>
+          <li>Add 1 tomato (~70g), 1 tsp red chilli powder, 1/2 tsp turmeric, salt. Cook until oil separates.</li>
+          <li>Add 350g chicken pieces (raw weight). Cover, cook 15 min on medium.</li>
+          <li>Finish with fresh coriander.</li>
+        </ol>
+        <div class="r-tip">No water needed — chicken releases its own juices.</div>
+      </div>
+    </details>
+
+    <details class="recipe">
+      <summary>Gongura Kodi</summary>
+      <div class="recipe-body">
+        <span class="r-tag r-time">30 min</span><span class="r-tag r-protein">~79g protein / 350g raw</span>
+        <ol>
+          <li>Wash 100g gongura leaves, remove stems, roughly chop.</li>
+          <li>Heat 1 tsp (5g) oil, splutter mustard, add 1 onion (~80g) + 4-5 dry red chillies.</li>
+          <li>Add gongura, saut&eacute; 5 min until it melts.</li>
+          <li>Add 350g chicken, 1/2 tsp turmeric, salt. Mix well.</li>
+          <li>Cover and cook 18-20 min. No tomato, no water — sourness comes from gongura.</li>
+        </ol>
+        <div class="r-tip">Red-stemmed erra gongura gives the authentic Telangana tang.</div>
+      </div>
+    </details>
+
+    <details class="recipe">
+      <summary>Nalla Karam Kodi</summary>
+      <div class="recipe-body">
+        <span class="r-tag r-time">20 min</span><span class="r-tag r-protein">~79g protein / 350g raw</span>
+        <ol>
+          <li>Dry roast 10g black pepper + 4 dry red chillies + 1 tsp cumin. Grind coarse.</li>
+          <li>Heat 1 tsp (5g) oil, add curry leaves + 1 onion (~80g), fry golden.</li>
+          <li>Add 350g chicken (boneless cooks faster), 1/2 tsp turmeric, salt.</li>
+          <li>Cook 10 min covered, then add the nalla karam powder.</li>
+          <li>Dry fry on high 3-4 min until coated and slightly charred.</li>
+        </ol>
+        <div class="r-tip">Dry prep — pepper heat builds slowly. Adjust chillies.</div>
+      </div>
+    </details>
+
+    <details class="recipe">
+      <summary>Karivepaku Kodi</summary>
+      <div class="recipe-body">
+        <span class="r-tag r-time">25 min</span><span class="r-tag r-protein">~79g protein / 350g raw</span>
+        <ol>
+          <li>Blend 30g curry leaves + 4 green chillies + 1 tsp cumin + 10g ginger into a paste.</li>
+          <li>Heat 1 tsp (5g) oil, pop mustard, add 1 onion (~80g), fry golden.</li>
+          <li>Add 350g chicken, 1/2 tsp turmeric, salt. Sear 3 min on high.</li>
+          <li>Add curry leaf paste, cover, cook 15 min.</li>
+          <li>Open lid, dry out on high 2-3 min. Garnish with fresh curry leaves.</li>
+        </ol>
+        <div class="r-tip">Use fresh dark-green curry leaves for the best aroma.</div>
+      </div>
+    </details>
+
+    <details class="recipe">
+      <summary>Kodi Guddu Pulusu</summary>
+      <div class="recipe-body">
+        <span class="r-tag r-time">20 min</span><span class="r-tag r-protein">~38g protein / 6 eggs</span>
+        <ol>
+          <li>Hard boil 6 eggs, peel, make 2 slits each.</li>
+          <li>Heat 1/2 tsp (2.5g) oil in a non-stick pan, add mustard + cumin + curry leaves + 1/2 onion (~40g).</li>
+          <li>Add 1/2 tsp ginger-garlic paste, 1 tomato (~60g), 1 tsp chilli powder, 1/2 tsp turmeric, salt.</li>
+          <li>Cook until mushy. Add 200ml water + 5g tamarind (marble-size).</li>
+          <li>Simmer 5 min, add eggs, cook 5 more min.</li>
+        </ol>
+        <div class="r-tip">Tamarind is what makes it pulusu. Pour over ragi sangati.</div>
+      </div>
+    </details>
+
+    <details class="recipe">
+      <summary>Ragi Sangati</summary>
+      <div class="recipe-body">
+        <span class="r-tag r-time">15 min</span><span class="r-tag r-protein">1 serve = 40g flour · 4.6g fibre</span>
+        <ol>
+          <li>Makes 2 serves: boil 200ml water with a pinch of salt.</li>
+          <li>Slowly add 80g ragi flour, stirring non-stop with a wooden ladle.</li>
+          <li>Keep stirring hard — no lumps. Lower the heat.</li>
+          <li>Cover 5 min, stir again until it comes together as one mass.</li>
+          <li>Wet hands, shape into 2 balls. <strong>Eat 1</strong>, fridge the other for tomorrow.</li>
+        </ol>
+        <div class="r-tip">Heavy-bottomed pan. Reheat leftovers with a splash of water.</div>
+      </div>
+    </details>
+
+    <details class="recipe">
+      <summary>Gongura Pachadi</summary>
+      <div class="recipe-body">
+        <span class="r-tag r-time">10 min</span><span class="r-tag r-protein">batch · 1 tbsp/day</span>
+        <ol>
+          <li>Heat 1 tsp oil, fry 4-5 dry red chillies + 2 garlic cloves (~6g) + 1 tsp urad dal until golden.</li>
+          <li>Add 100g gongura leaves, saut&eacute; 3-4 min until wilted.</li>
+          <li>Cool fully. Grind coarse with salt.</li>
+          <li>Temper with mustard + curry leaves in 1/2 tsp oil.</li>
+        </ol>
+        <div class="r-tip">Makes ~6 tbsp — lasts the week in the fridge.</div>
+      </div>
+    </details>
+
+    <details class="recipe">
+      <summary>Pesarattu</summary>
+      <div class="recipe-body">
+        <span class="r-tag r-time">10 min + soak</span><span class="r-tag r-protein">~12g protein / 2 dosas</span>
+        <ol>
+          <li>Soak 100g whole green moong overnight (makes ~4 dosas).</li>
+          <li>Grind with 2 green chillies + 10g ginger + salt. Slightly coarse batter.</li>
+          <li>No fermentation — use right away.</li>
+          <li>Spread thin on a hot tawa, 1/4 tsp oil around the edges.</li>
+          <li>Cook till crisp. Serve with allam pachadi.</li>
+        </ol>
+        <div class="r-tip">Weekend swap for the lunch rotte (2 dosas ≈ same calories).</div>
+      </div>
+    </details>
+
+  </div>
+</div>
+
+<div class="section">
+  <h2>Fibre Sources — Telangana Staples</h2>
+  <div class="scroll-x">
+  <table class="data">
+    <thead><tr><th>Food</th><th>Telugu</th><th>Fibre</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>Jowar roti (40g flour)</td><td>Jonna rotte</td><td class="mfi">3.9g</td><td>Primary lunch grain</td></tr>
+      <tr><td>Bajra roti (40g flour)</td><td>Sajja rotte</td><td class="mfi">4.6g</td><td>Alternate millet, high iron</td></tr>
+      <tr><td>Ragi ball (40g flour)</td><td>Ragi sangati</td><td class="mfi">4.6g</td><td>Dinner staple, calcium rich</td></tr>
+      <tr><td>Drumstick 100g</td><td>Munagakaya</td><td class="mfi">4.8g</td><td>Fibre king of kooralu</td></tr>
+      <tr><td>Broad beans 100g</td><td>Chikkudukaya</td><td class="mfi">6g</td><td>Seasonal, extra protein</td></tr>
+      <tr><td>Amaranth 100g</td><td>Thotakura</td><td class="mfi">3.5g</td><td>Iron-rich green</td></tr>
+      <tr><td>Okra 100g</td><td>Bendakaya</td><td class="mfi">3.2g</td><td>Year-round</td></tr>
+      <tr><td>Guava 100g</td><td>Jamakaya</td><td class="mfi">5.4g</td><td>Best fruit for fibre</td></tr>
+      <tr><td>Chia 20g + flax 20g</td><td>Fibre bowl</td><td class="mfi">12.4g</td><td>Fixed morning bowl</td></tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<div class="section">
+  <h2>Purine Safety Guide</h2>
+  <div class="scroll-x">
+  <table class="data">
+    <thead><tr><th>Food</th><th>Status</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>Eggs</td><td><span class="badge badge-safe">Safe</span></td><td>Low purine, daily is fine</td></tr>
+      <tr><td>Paneer / perugu / skyr</td><td><span class="badge badge-safe">Safe</span></td><td>Dairy lowers uric acid</td></tr>
+      <tr><td>Whey protein</td><td><span class="badge badge-safe">Safe</span></td><td>Low purine</td></tr>
+      <tr><td>Jonna / sajja / ragi / annam</td><td><span class="badge badge-safe">Safe</span></td><td>All grains fine</td></tr>
+      <tr><td>Most kooralu, gongura</td><td><span class="badge badge-safe">Safe</span></td><td>Sorakaya, beerakaya, bendakaya, dondakaya, munagakaya</td></tr>
+      <tr><td>Kodi (chicken breast)</td><td><span class="badge badge-mod">Moderate</span></td><td>Cap 400g raw/day, 3.5L+ water</td></tr>
+      <tr><td>Moong / toor pappu</td><td><span class="badge badge-mod">Moderate</span></td><td>1 katori/day max</td></tr>
+      <tr><td>Palakura (spinach)</td><td><span class="badge badge-mod">Moderate</span></td><td>Cooked, 2-3x/week</td></tr>
+      <tr><td>Senagapappu (chana)</td><td><span class="badge badge-mod">Moderate</span></td><td>Occasional in pachadi only</td></tr>
+      <tr><td>Boti (organ meats)</td><td><span class="badge badge-avoid">Avoid</span></td><td>Liver, kidney — very high purine</td></tr>
+      <tr><td>Mamsam (mutton / red meat)</td><td><span class="badge badge-avoid">Avoid</span></td><td>High purine</td></tr>
+      <tr><td>Royyalu, sardines, anchovies</td><td><span class="badge badge-avoid">Avoid</span></td><td>Shellfish + oily small fish = highest purine</td></tr>
+      <tr><td>Soya chunks</td><td><span class="badge badge-avoid">Avoid</span></td><td>High purine plant protein</td></tr>
+      <tr><td>Madyam (alcohol, esp. beer)</td><td><span class="badge badge-avoid">Avoid</span></td><td>Spikes uric acid directly</td></tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<div class="section">
+  <h2>Supplements Stack</h2>
+  <div class="supps-grid">
+    <div class="supp-card"><div class="sname">MB Gold Whey</div><div class="sdose">2 scoops · post-workout</div><div class="swhy">50g protein, counted in Meal 1</div></div>
+    <div class="supp-card"><div class="sname">Creatine Monohydrate</div><div class="sdose">5g daily · post-workout</div><div class="swhy">Strength + muscle retention</div></div>
+    <div class="supp-card"><div class="sname">Vitamin D3</div><div class="sdose">60,000 IU · once weekly</div><div class="swhy">Same day each week, with a meal that has fat</div></div>
+    <div class="supp-card"><div class="sname">Fish Oil (Omega-3)</div><div class="sdose">Daily · after Meal 1</div><div class="swhy">Joints, inflammation, heart</div></div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>Non-Negotiables</h2>
+  <div class="rules">
+    <div class="rule"><span class="rule-icon">&#9670;</span><span><strong>Weigh chicken raw.</strong> 350g raw ≈ 79g protein. Cooked weight would overstate it by ~30%.</span></div>
+    <div class="rule"><span class="rule-icon">&#9670;</span><span><strong>Measure oil with a spoon.</strong> Every free-poured tsp is 45 kcal. Lunch budget = 1 tsp for kodi + 1/2 tsp for koora.</span></div>
+    <div class="rule"><span class="rule-icon">&#9670;</span><span><strong>Jonna/sajja rotte over annam in cut phases.</strong> Annam comes back from diet break onward.</span></div>
+    <div class="rule"><span class="rule-icon">&#9670;</span><span><strong>Ragi sangati at dinner:</strong> 40g flour per serve, not a full pot.</span></div>
+    <div class="rule"><span class="rule-icon">&#9670;</span><span><strong>Munagakaya or chikkudukaya koora 3x/week</strong> for the fibre floor.</span></div>
+    <div class="rule"><span class="rule-icon">&#9670;</span><span><strong>3.5L+ water daily</strong> — non-negotiable for uric acid clearance at this protein level.</span></div>
+    <div class="rule"><span class="rule-icon">&#9670;</span><span><strong>Lipid panel + uric acid every 3 months</strong> with 6 eggs/day and 350g+ chicken.</span></div>
+    <div class="rule"><span class="rule-icon">&#9670;</span><span><strong>No madyam.</strong> Spikes uric acid, kills recovery.</span></div>
+  </div>
+</div>
+
+<div class="footer">
+  <p>FORGE Nutrition Protocol · Vishnu Teja · Telangana Kitchen · Winter Arc 2026</p>
+  <p style="margin-top:6px;letter-spacing:1px;text-transform:none;font-family:'Space Grotesk',sans-serif;">Macros from IFCT/USDA values · chicken raw weight · HP paneer assumed ~23g P / 12g F per 100g — check your brand label.</p>
+</div>
+
+<script>
+/* DIET-DATA-START */
+// [kcal, protein, fat, carbs, fibre]
+const FOODS = {
+  whey:      { q: '2 scoops', n: 'MB Gold Whey in water', m: [260, 50, 3, 8, 0] },
+  chia:      { q: '20g', n: 'Chia (soaked overnight)', m: [97, 3.3, 6.1, 8.4, 6.9] },
+  flax:      { q: '20g', n: 'Flax seeds', m: [107, 3.7, 8.4, 5.8, 5.5] },
+  berries:   { q: '30g + 10g', n: 'Mixed berries + kishmish', m: [45, 0.5, 0.2, 11, 2] },
+  skyr:      { q: '100g', n: 'Skyr yogurt', m: [63, 11, 0.2, 4, 0] },
+  muesli:    { q: '20g', n: 'Muesli', m: [75, 2, 1.5, 13, 1.5] },
+  seeds:     { q: '18g', n: 'Sunflower + pumpkin + watermelon seeds (6g each)', m: [105, 5, 8.5, 2, 1] },
+  almonds:   { q: '12-15', n: 'Almonds (~17g)', m: [98, 3.6, 8.5, 3.7, 2] },
+  banana:    { q: '1 (~100g)', n: 'Arati pandu (banana) — 30 min before training', m: [90, 1.1, 0.3, 23, 2.6] },
+  chicken350:{ q: '350g raw', n: 'Kodi — kura / gongura / nalla karam / karivepaku', m: [420, 78.8, 9.1, 0, 0] },
+  chicken400:{ q: '400g raw', n: 'Kodi — kura / gongura / nalla karam / karivepaku', m: [480, 90, 10.4, 0, 0] },
+  oil1:      { q: '1 tsp (5g)', n: 'Oil for the kodi', m: [45, 0, 5, 0, 0] },
+  oilHalf:   { q: '1/2 tsp', n: 'Oil (non-stick pan)', m: [22, 0, 2.5, 0, 0] },
+  masala:    { q: '~150g', n: 'Onion + tomato masala base', m: [40, 1.5, 0.2, 8, 2] },
+  masalaHalf:{ q: '~75g', n: 'Onion + tomato for pulusu / kura', m: [20, 0.7, 0.1, 4, 1] },
+  jonna:     { q: '1 (40g flour)', n: 'Jonna rotte or sajja rotte', m: [140, 4, 1.4, 29, 3.9], note: '3 days/week swap for 1 katori pappu (no neyyi) — same calories' },
+  jonna2:    { q: '2 (80g flour)', n: 'Jonna rotte or sajja rotte', m: [280, 8, 2.8, 58, 7.8] },
+  ragi:      { q: '1 (40g flour)', n: 'Ragi sangati', m: [131, 2.9, 0.5, 28.8, 4.6] },
+  koora:     { q: '150g', n: 'Koora, cooked in 1/2 tsp oil', m: [62, 2, 2.6, 7, 4] },
+  pachadi:   { q: '1 tbsp', n: 'Gongura or tomato pachadi', m: [30, 0.3, 2.5, 2, 1] },
+  perugu:    { q: '100g', n: 'Perugu (curd)', m: [60, 3.5, 3, 4.5, 0] },
+  guava:     { q: '1 (~100g)', n: 'Jamakaya (guava) after lunch', m: [68, 2.6, 1, 14, 5.4] },
+  annam100:  { q: '100g cooked', n: 'Annam (sona masoori)', m: [130, 2.7, 0.3, 29, 0.4] },
+  annam150:  { q: '150g cooked', n: 'Annam (sona masoori)', m: [195, 4, 0.4, 43, 0.6] },
+  annam200:  { q: '200g cooked', n: 'Annam (sona masoori)', m: [260, 5.4, 0.6, 57, 0.8] },
+  pappu:     { q: '1 katori', n: 'Pappu (35g dry moong/toor) + 1 tsp neyyi tadka', m: [170, 8.5, 5.4, 21, 3] },
+  eggs6:     { q: '6 whole', n: 'Eggs — guddu pulusu / bhurji / boiled with karam', m: [430, 37.8, 30, 2.4, 0] },
+  paneer:    { q: '200g', n: 'High-protein paneer — paneer kura / mirchi fry', m: [420, 46, 24, 8, 0] }
+};
+
+const M1 = ['whey', 'chia', 'flax', 'berries', 'skyr', 'muesli', 'seeds', 'almonds'];
+const EGG = ['eggs6', 'oilHalf', 'masalaHalf', 'ragi', 'koora'];
+const PANEER = ['paneer', 'oilHalf', 'masalaHalf', 'ragi', 'koora'];
+const LUNCH_CUT = ['chicken350', 'oil1', 'masala', 'jonna', 'koora', 'pachadi', 'perugu', 'guava'];
+
+const PHASES = [
+  { id: 'p1', num: '01', name: 'Aggressive Cut', weeks: 'WK 1-4', tag: 'DEFICIT', tagClass: 'tag-deficit', deficit: '~700 kcal deficit',
+    pre: [], lunch: LUNCH_CUT, newItems: [],
+    change: 'Base plan',
+    note: '<strong>Foundation.</strong> Train fasted (or black coffee). Pappu 3 days/week in place of the rotte. Expect 0.6-0.8 kg/week down.' },
+  { id: 'p2', num: '02', name: 'Cut + Hypertrophy', weeks: 'WK 5-8', tag: 'DEFICIT', tagClass: 'tag-deficit', deficit: '~600 kcal deficit',
+    pre: ['banana'], lunch: LUNCH_CUT, newItems: ['banana'],
+    change: '+ banana pre-workout',
+    note: '<strong>Volume goes up, so fuel the session.</strong> Only change: 1 banana 30 min before training. Everything else stays.' },
+  { id: 'p3', num: '03', name: 'Diet Break', weeks: 'WK 9-10', tag: 'MAINTAIN', tagClass: 'tag-maint', deficit: '~maintenance',
+    pre: ['banana'], lunch: ['chicken350', 'oil1', 'masala', 'jonna', 'annam150', 'pappu', 'koora', 'pachadi', 'perugu', 'guava'], newItems: ['annam150', 'pappu'],
+    change: '+ 150g annam, + daily pappu with neyyi',
+    note: '<strong>Hormone + leptin reset.</strong> Annam back at lunch, pappu with neyyi daily. Scale will jump 1-2 kg from glycogen and water — that is not fat.' },
+  { id: 'p4', num: '04', name: 'Moderate Cut', weeks: 'WK 11-17', tag: 'DEFICIT', tagClass: 'tag-deficit', deficit: '~450 kcal deficit',
+    pre: ['banana'], lunch: LUNCH_CUT, newItems: [],
+    change: 'Same food as Phase 2',
+    note: '<strong>Same plate as Phase 2.</strong> You are ~6-8 kg lighter, so the same food is now a smaller deficit. Strength block — heavy compounds, deload WK 14.' },
+  { id: 'p5', num: '05', name: 'Slow Cut', weeks: 'WK 18-24', tag: 'DEFICIT', tagClass: 'tag-deficit', deficit: '~300 kcal deficit',
+    pre: ['banana'], lunch: ['chicken350', 'oil1', 'masala', 'jonna', 'annam100', 'koora', 'pachadi', 'perugu', 'guava'], newItems: ['annam100'],
+    change: '+ 100g annam at lunch',
+    note: '<strong>Peak hypertrophy volume.</strong> 100g annam joins the lunch rotte for training carbs. Deload WK 20. Weekly refeed day = Phase 3 menu.' },
+  { id: 'p6', num: '06', name: 'Mini Bulk', weeks: 'WK 25-28', tag: 'SURPLUS', tagClass: 'tag-surplus', deficit: '~+150 kcal surplus',
+    pre: ['banana'], lunch: ['chicken400', 'oil1', 'masala', 'jonna', 'annam200', 'pappu', 'koora', 'pachadi', 'perugu', 'guava'], newItems: ['chicken400', 'annam200', 'pappu'],
+    change: '400g chicken, 200g annam, daily pappu',
+    note: '<strong>Push the weights.</strong> Chicken to 400g raw (purine cap), 200g annam, pappu with neyyi daily. Sleep 8 hrs. Aim +0.25 kg/week max.' },
+  { id: 'p7', num: '07', name: 'Recomposition', weeks: 'WK 29-32', tag: 'RECOMP', tagClass: 'tag-maint', deficit: '~maintenance',
+    pre: ['banana'], lunch: ['chicken350', 'oil1', 'masala', 'jonna', 'annam150', 'pappu', 'koora', 'pachadi', 'perugu', 'guava'], newItems: [],
+    change: 'Same food as Phase 3',
+    note: '<strong>Maintenance — hold the line.</strong> Same plate as the diet break. Mixed rep ranges, waist should keep dropping while weight holds.' }
+];
+/* DIET-DATA-END */
+
+const sum = keys => keys.reduce((a, k) => a.map((v, i) => v + FOODS[k].m[i]), [0, 0, 0, 0, 0]);
+const add = (...arrs) => arrs.reduce((a, b) => a.map((v, i) => v + b[i]), [0, 0, 0, 0, 0]);
+const r = v => Math.round(v);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+function dayTotals(p, dinner) { return add(sum(p.pre), sum(M1), sum(p.lunch), sum(dinner)); }
+
+function itemsTable(keys, newItems, showNotes = true) {
+  return '<table class="items">' + keys.map(k => {
+    const f = FOODS[k];
+    const cls = newItems.includes(k) ? ' class="new"' : '';
+    const note = f.note && showNotes ? `<span class="item-note">${esc(f.note)}</span>` : '';
+    return `<tr${cls}><td class="q">${esc(f.q)}</td><td class="n">${esc(f.n)}${note}</td><td class="k">${r(f.m[0])} kcal</td></tr>`;
+  }).join('') + '</table>';
+}
+
+function macroRow(m) {
+  return `<div class="macro-row">
+    <div class="macro-pill"><div class="mv mk">${r(m[0])}</div><div class="ml">Kcal</div></div>
+    <div class="macro-pill"><div class="mv mp">${r(m[1])}g</div><div class="ml">Protein</div></div>
+    <div class="macro-pill"><div class="mv mf">${r(m[2])}g</div><div class="ml">Fat</div></div>
+    <div class="macro-pill"><div class="mv mc">${r(m[3])}g</div><div class="ml">Carbs</div></div>
+    <div class="macro-pill"><div class="mv mfi">${r(m[4])}g</div><div class="ml">Fibre</div></div>
+  </div>`;
+}
+
+function render(id) {
+  const p = PHASES.find(x => x.id === id) || PHASES[0];
+  const egg = dayTotals(p, EGG), pan = dayTotals(p, PANEER);
+  const badge = p.newItems.length ? '<span class="new-badge">NEW THIS PHASE</span>' : '';
+  const pre = p.pre.length ? `
+    <div class="meal-card extra">
+      <div class="meal-header"><span class="meal-time">8:00 AM</span><span class="meal-name">Pre-Workout${p.newItems.includes('banana') ? badge : ''}</span></div>
+      ${itemsTable(p.pre, p.newItems)}
+    </div>` : '';
+
+  document.getElementById('phaseView').innerHTML = `
+    <div class="phase-head">
+      <h2>Phase ${p.num} · ${esc(p.name)}</h2>
+      <span><span class="tag ${p.tagClass}">${p.tag}</span> <span class="mono" style="color:var(--muted);font-size:13px;letter-spacing:2px;">${p.weeks}</span></span>
+    </div>
+    <div class="phase-note">${p.note}</div>
+
+    <div class="profile-grid">
+      <div class="stat-card"><div class="val mk">${r(egg[0]).toLocaleString()}</div><div class="label">Calories</div></div>
+      <div class="stat-card"><div class="val mp">${r(egg[1])}g</div><div class="label">Protein</div></div>
+      <div class="stat-card"><div class="val mf">${r(egg[2])}g</div><div class="label">Fat</div></div>
+      <div class="stat-card"><div class="val mc">${r(egg[3])}g</div><div class="label">Carbs</div></div>
+      <div class="stat-card"><div class="val mfi">${r(egg[4])}g</div><div class="label">Fibre</div></div>
+      <div class="stat-card"><div class="val mk">3.5L+</div><div class="label">Water</div></div>
+    </div>
+
+    <div class="section">
+      <h2>Daily Meal Plan</h2>
+      ${pre}
+      <div class="meal-card">
+        <div class="meal-header"><span class="meal-time">10:15 AM</span><span class="meal-name">Meal 1 · Post-Workout Fibre Bowl</span></div>
+        ${itemsTable(M1, [])}
+        ${macroRow(sum(M1))}
+      </div>
+      <div class="meal-card">
+        <div class="meal-header"><span class="meal-time">2:00 PM</span><span class="meal-name">Meal 2 · Telugu Lunch${p.lunch.some(k => p.newItems.includes(k)) ? badge : ''}</span></div>
+        ${itemsTable(p.lunch, p.newItems, !p.lunch.includes('pappu'))}
+        ${macroRow(sum(p.lunch))}
+      </div>
+      <div class="meal-card">
+        <div class="meal-header"><span class="meal-time">7:30 PM</span><span class="meal-name">Meal 3 · Dinner</span></div>
+        <div class="variant-grid">
+          <div class="variant"><div class="variant-title">EGG DAYS · MON TUE THU FRI</div>${itemsTable(EGG, [])}</div>
+          <div class="variant"><div class="variant-title">PANEER DAYS · WED SAT SUN</div>${itemsTable(PANEER, [])}</div>
+        </div>
+        ${macroRow(sum(EGG))}
+      </div>
+    </div>
+
+    <div class="totals-card">
+      <h2>Daily Totals · Phase ${p.num}</h2>
+      <div class="totals-grid">
+        <div class="total-item"><div class="tv mk">${r(egg[0]).toLocaleString()}</div><div class="tl">Calories</div><div class="tt">${esc(p.deficit)}</div></div>
+        <div class="total-item"><div class="tv mp">${r(egg[1])}g</div><div class="tl">Protein</div><div class="tt">${(egg[1] / 105).toFixed(1)} g/kg</div></div>
+        <div class="total-item"><div class="tv mf">${r(egg[2])}g</div><div class="tl">Fat</div><div class="tt">${r(egg[2] * 9 / egg[0] * 100)}% kcal</div></div>
+        <div class="total-item"><div class="tv mc">${r(egg[3])}g</div><div class="tl">Carbs</div><div class="tt">${r(egg[3] * 4 / egg[0] * 100)}% kcal</div></div>
+        <div class="total-item"><div class="tv mfi">${r(egg[4])}g</div><div class="tl">Fibre</div><div class="tt">target 38g+</div></div>
+      </div>
+      <div class="totals-foot">Egg days shown. Paneer days: ${r(pan[0]).toLocaleString()} kcal · ${r(pan[1])}g P · ${r(pan[2])}g F · ${r(pan[3])}g C. All cooking oil counted.</div>
+    </div>`;
+
+  document.querySelectorAll('.phase-tab').forEach(t => t.classList.toggle('active', t.dataset.id === p.id));
+  document.querySelectorAll('#phaseTable tbody tr').forEach(tr => tr.classList.toggle('cur', tr.dataset.id === p.id));
+  try { localStorage.setItem('forgeDietPhase', p.id); } catch (e) {}
+}
+
+document.getElementById('phaseTabs').innerHTML = PHASES.map(p => {
+  const t = dayTotals(p, EGG);
+  return `<button class="phase-tab" data-id="${p.id}"><div class="pt-num">PHASE ${p.num} · ${p.weeks}</div><div class="pt-name">${esc(p.name)}</div><div class="pt-cal">${r(t[0]).toLocaleString()} kcal</div></button>`;
+}).join('');
+
+document.querySelector('#phaseTable tbody').innerHTML = PHASES.map(p => {
+  const t = dayTotals(p, EGG);
+  return `<tr data-id="${p.id}"><td>${p.num} · ${esc(p.name)}</td><td>${p.weeks}</td><td>${r(t[0]).toLocaleString()}</td><td>${r(t[1])}g</td><td>${r(t[2])}g</td><td>${r(t[3])}g</td><td>${r(t[4])}g</td><td>${esc(p.change)}</td></tr>`;
+}).join('');
+
+document.getElementById('phaseTabs').addEventListener('click', e => {
+  const b = e.target.closest('.phase-tab');
+  if (b) render(b.dataset.id);
+});
+document.getElementById('phaseTable').addEventListener('click', e => {
+  const tr = e.target.closest('tr[data-id]');
+  if (tr) { render(tr.dataset.id); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+});
+
+let start = 'p1';
+try { start = localStorage.getItem('forgeDietPhase') || 'p1'; } catch (e) {}
+if (/^#p[1-7]$/.test(location.hash)) start = location.hash.slice(1);
+render(start);
+</script>
+</body>
+</html>
