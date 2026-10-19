@@ -1124,34 +1124,27 @@ body::before {
 
 /* ── LOADING SCREEN — CINEMATIC ── */
 .forge-loader {
-  position: fixed; inset: 0; z-index: 99999;
+  position: fixed; inset: 0; z-index: 1000000;
   background: #020202;
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
   transition: opacity 1s cubic-bezier(.22,1,.36,1), visibility 1s;
 }
 .forge-loader.done { opacity: 0; visibility: hidden; pointer-events: none; }
-.loader-rings {
-  position: absolute; display: flex; align-items: center; justify-content: center;
-}
-.loader-ring {
-  position: absolute; border-radius: 50%;
-  border: 1px solid rgba(0,212,255,0.06);
-}
-.loader-ring:nth-child(1) { width: 120px; height: 120px; animation: loaderRingSpin 4s linear infinite; }
-.loader-ring:nth-child(2) { width: 180px; height: 180px; border-color: rgba(59,130,246,0.04); animation: loaderRingSpin 6s linear infinite reverse; }
-.loader-ring:nth-child(3) { width: 240px; height: 240px; border-color: rgba(168,85,247,0.03); animation: loaderRingSpin 8s linear infinite; }
-@keyframes loaderRingSpin { to { transform: rotate(360deg); } }
 .loader-logo {
+  position: absolute;
+  right: max(28px, env(safe-area-inset-right, 0px));
+  bottom: max(28px, env(safe-area-inset-bottom, 0px));
   font-family: 'Barlow Condensed', sans-serif;
-  font-weight: 900; font-size: 80px; letter-spacing: 16px;
-  background: linear-gradient(90deg, transparent, var(--acid), #fff, var(--acid), transparent);
-  background-size: 300% 100%;
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: loaderShimmer 1.5s ease-in-out infinite;
-  position: relative; z-index: 1;
+  font-weight: 900; font-size: 44px; letter-spacing: 10px; line-height: 1;
+  color: var(--acid);
+  animation: loaderGlow 1.6s ease-in-out infinite;
 }
+@keyframes loaderGlow {
+  0%, 100% { opacity: .35; text-shadow: 0 0 0 rgba(0,212,255,0); }
+  50% { opacity: 1; text-shadow: 0 0 12px rgba(0,212,255,.9), 0 0 36px rgba(0,212,255,.5); }
+}
+@media (prefers-reduced-motion: reduce) { .loader-logo { animation: none; opacity: 1; } }
 .loader-bar-wrap {
   width: 280px; height: 2px;
   background: rgba(255,255,255,0.04);
@@ -1791,7 +1784,6 @@ body::before {
   .accent-line { display: none; }
   .hero-title { font-size: clamp(60px, 14vw, 120px) !important; letter-spacing: -3px !important; }
   .hero-title .char { animation-duration: .5s !important; }
-  .loader-rings { display: none; }
   .sc-v { font-size: 36px !important; }
   .ft-logo { font-size: 48px !important; }
 }
@@ -3252,11 +3244,6 @@ body::before {
 
 <!-- LOADING SCREEN — CINEMATIC -->
 <div class="forge-loader" id="forgeLoader">
-  <div class="loader-rings">
-    <div class="loader-ring"></div>
-    <div class="loader-ring"></div>
-    <div class="loader-ring"></div>
-  </div>
   <div class="loader-logo" id="loaderLogoText">FORGE</div>
 </div>
 
@@ -6996,8 +6983,16 @@ function initForgeEffects() {
   // ── 1. LOADING SCREEN ──
   const loader = document.getElementById('forgeLoader');
   if (loader) {
-    setTimeout(() => loader.classList.add('done'), 2200);
-    setTimeout(() => { if (loader.parentNode) loader.remove(); }, 3200);
+    const t0 = performance.now();
+    let hidden = false;
+    const hide = () => {
+      if (hidden) return; hidden = true;
+      loader.classList.add('done');
+      setTimeout(() => { if (loader.parentNode) loader.remove(); }, 1000);
+    };
+    const onLoad = () => setTimeout(hide, Math.max(0, 900 - (performance.now() - t0)));
+    if (document.readyState === 'complete') onLoad(); else window.addEventListener('load', onLoad, { once: true });
+    setTimeout(hide, 4000);
   }
 
   // ── 2. SCROLL PROGRESS BAR ──
@@ -7537,34 +7532,6 @@ function initForgeEffects() {
         }
       });
     });
-  }
-
-  // ── 19. ENHANCED LOADER — PARTICLE BURST ──
-  const loaderEl = document.getElementById('forgeLoader');
-  if (loaderEl) {
-    for (let i = 0; i < 20; i++) {
-      const dot = document.createElement('div');
-      dot.style.cssText = `
-        position:absolute; width:${Math.random()*3+1}px; height:${Math.random()*3+1}px;
-        background:rgba(0,212,255,${Math.random()*0.3+0.1});
-        border-radius:50%; pointer-events:none;
-        left:${50 + (Math.random()-0.5)*40}%;
-        top:${50 + (Math.random()-0.5)*40}%;
-        animation: loaderParticle ${3+Math.random()*4}s ease-in-out ${Math.random()*2}s infinite;
-      `;
-      loaderEl.appendChild(dot);
-    }
-    if (!document.getElementById('loaderParticleStyle')) {
-      const s = document.createElement('style');
-      s.id = 'loaderParticleStyle';
-      s.textContent = `
-        @keyframes loaderParticle {
-          0%,100% { opacity:0; transform:translate(0,0) scale(0.5); }
-          50% { opacity:1; transform:translate(${Math.random()>0.5?'':'-'}${20+Math.random()*30}px, ${Math.random()>0.5?'':'-'}${20+Math.random()*30}px) scale(1); }
-        }
-      `;
-      document.head.appendChild(s);
-    }
   }
 
   console.log('%c⚡ FORGE ULTRA-PREMIUM ENGINE v5.0', 'color:#00D4FF;font-weight:bold;font-size:16px;background:linear-gradient(135deg,#020205,#0a1020);padding:6px 16px;border-radius:6px;border:1px solid rgba(0,212,255,0.3);');
