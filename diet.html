@@ -72,7 +72,7 @@ h1, h2, h3 { font-family: 'Barlow Condensed', sans-serif; text-transform: upperc
 
 .profile-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-bottom: 24px; }
 .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 12px; text-align: center; }
-.stat-card .val { font-family: 'Barlow Condensed', sans-serif; font-size: 28px; font-weight: 800; }
+.stat-card .val { font-variant-numeric: tabular-nums; font-family: 'Barlow Condensed', sans-serif; font-size: 28px; font-weight: 800; }
 .stat-card .label { font-size: 10px; color: var(--dim); letter-spacing: 2px; text-transform: uppercase; margin-top: 2px; }
 
 .section { margin-bottom: 36px; }
@@ -542,8 +542,28 @@ function macroRow(m) {
   </div>`;
 }
 
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+function rollNumbers(prev) {
+  const els = document.querySelectorAll('#phaseView .stat-card .val, #phaseView .total-item .tv');
+  els.forEach((el, i) => {
+    const m = el.textContent.match(/^([\d,]+)(.*)$/);
+    const pm = prev[i] && prev[i].match(/^([\d,]+)/);
+    if (!m || !pm || reduceMotion.matches) return;
+    const to = +m[1].replace(/,/g, ''), from = +pm[1].replace(/,/g, ''), suffix = m[2], comma = m[1].includes(',');
+    if (from === to) return;
+    const fmt = v => (comma ? Math.round(v).toLocaleString('en-US') : String(Math.round(v))) + suffix;
+    const t0 = performance.now();
+    (function step(t) {
+      const k = Math.min(1, (t - t0) / 300), e = 1 - Math.pow(1 - k, 3);
+      el.textContent = fmt(from + (to - from) * e);
+      if (k < 1) requestAnimationFrame(step);
+    })(t0);
+  });
+}
+
 function render(id) {
   const p = PHASES.find(x => x.id === id) || PHASES[0];
+  const prevVals = [...document.querySelectorAll('#phaseView .stat-card .val, #phaseView .total-item .tv')].map(e => e.textContent);
   const egg = dayTotals(p, EGG), pan = dayTotals(p, PANEER);
   const badge = p.newItems.length ? '<span class="new-badge">NEW THIS PHASE</span>' : '';
   const pre = p.pre.length ? `
@@ -603,6 +623,11 @@ function render(id) {
       <div class="totals-foot">Egg days shown. Paneer days: ${r(pan[0]).toLocaleString()} kcal · ${r(pan[1])}g P · ${r(pan[2])}g F · ${r(pan[3])}g C. All cooking oil counted.</div>
     </div>`;
 
+  rollNumbers(prevVals);
+  const meals = document.querySelector('#phaseView .section');
+  if (prevVals.length && meals && meals.animate && !reduceMotion.matches) {
+    meals.animate([{ opacity: 0.35, transform: 'translateY(6px)' }, { opacity: 1, transform: 'none' }], { duration: 220, easing: 'cubic-bezier(0.23, 1, 0.32, 1)' });
+  }
   document.querySelectorAll('.phase-tab').forEach(t => t.classList.toggle('active', t.dataset.id === p.id));
   document.querySelectorAll('#phaseTable tbody tr').forEach(tr => tr.classList.toggle('cur', tr.dataset.id === p.id));
   try { localStorage.setItem('forgeDietPhase', p.id); } catch (e) {}

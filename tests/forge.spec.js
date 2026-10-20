@@ -210,3 +210,75 @@ test.describe('Phone feel (mobile-native + calm motion)', () => {
     await noHorizontalScroll(page);
   });
 });
+
+test.describe('Motion (feedback animations)', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => localStorage.setItem('forge_welcomed', '1'));
+    await page.goto('./');
+    await expect(page.locator('#forgeLoader')).toHaveCount(0, { timeout: 6000 });
+  });
+
+  test('session opens and closes with a measured height animation', async ({ page }) => {
+    const body = page.locator('#pull-body');
+    await page.locator('#pull .sb-hdr').click();
+    expect(await body.evaluate(b => b.getAnimations().length)).toBeGreaterThan(0);
+    await expect.poll(() => body.evaluate(b => b.getAnimations().length)).toBe(0);
+    expect(await body.evaluate(b => b.offsetHeight)).toBeGreaterThan(300);
+    await page.locator('#pull .sb-hdr').click();
+    await expect.poll(() => body.evaluate(b => b.offsetHeight)).toBe(0);
+  });
+
+  test('set check draws a tick, fades the row, grows progress', async ({ page }) => {
+    await page.locator('#pull .sb-hdr').click();
+    const row = page.locator('#pull .ex-table tbody tr').first();
+    const check = row.locator('.ex-check');
+    await check.click();
+    await expect(check).toHaveClass(/checked/);
+    await expect.poll(() => check.locator('path').evaluate(p => parseFloat(getComputedStyle(p).strokeDashoffset))).toBe(0);
+    await expect.poll(() => row.evaluate(r => +getComputedStyle(r).opacity)).toBeLessThan(0.5);
+    const scale = await page.locator('#pull .sp-fill').evaluate(f => new DOMMatrix(getComputedStyle(f).transform).a);
+    expect(scale).toBeGreaterThan(0);
+    await check.click();
+    await expect(check).not.toHaveClass(/checked/);
+  });
+
+  test('rest timer shows a draining ring and closes on skip', async ({ page }) => {
+    await page.locator('#pull .sb-hdr').click();
+    const rest = page.locator('#pull .ex-table tbody tr').nth(1).locator('td').nth(4);
+    await rest.scrollIntoViewIfNeeded();
+    await rest.click();
+    await expect(page.locator('#restTimer')).toHaveClass(/active/);
+    const ring = page.locator('#rtRing');
+    await expect.poll(() => ring.evaluate(r => parseFloat(getComputedStyle(r).strokeDashoffset)), { timeout: 4000 }).toBeGreaterThan(0.5);
+    await page.locator('#rtSkip').click();
+    await expect(page.locator('#restTimer')).not.toHaveClass(/active/);
+  });
+
+  test('phase switch rolls the calories through in-between values', async ({ page }) => {
+    await page.evaluate(() => document.getElementById('nutrition').scrollIntoView());
+    const seen = await page.evaluate(() => new Promise(res => {
+      const n = document.querySelector('#macroGrid .mc-val');
+      document.querySelector('.mtab[data-macro="p6"]').click();
+      const vals = [], t0 = performance.now();
+      (function s() { vals.push(document.querySelector('#macroGrid .mc-val').firstChild.nodeValue); performance.now() - t0 < 500 ? requestAnimationFrame(s) : res(vals); })();
+    }));
+    const nums = seen.map(v => +v.replace(/,/g, ''));
+    expect(nums.at(-1)).toBe(2960);
+    expect(nums.some(v => v > 2380 && v < 2960)).toBe(true);
+  });
+
+  test('reduced motion: numbers jump straight to the value', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.locator('.mtab[data-macro="p6"]').click();
+    expect(await page.locator('#macroGrid .mc-val').first().evaluate(v => v.firstChild.nodeValue)).toBe('2,960');
+  });
+});
+
+test.describe('Diet chart motion', () => {
+  test('phase switch rolls numbers to the exact value', async ({ page }) => {
+    await page.goto('diet.html#p1');
+    await page.locator('.phase-tab[data-id="p6"]').click();
+    await expect(page.locator('.stat-card .val').first()).toHaveText('2,960');
+    await expect(page.locator('.total-item .tv').nth(1)).toHaveText('241g');
+  });
+});

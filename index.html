@@ -3478,6 +3478,46 @@ html.forge-still #snowCanvas, html.forge-still .hero-canvas { visibility: hidden
   .macro-tabs::-webkit-scrollbar { display: none; }
   .macro-tabs .mtab { flex: 0 0 auto; scroll-snap-align: start; }
 }
+
+/* ══ MOTION LAYER — feedback, not decoration (Emil: ease-out, <300ms, transform/opacity) ══ */
+:root { --ease-out: cubic-bezier(0.23, 1, 0.32, 1); --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1); }
+
+/* set check */
+.ex-check { transition: background-color 150ms var(--ease-out), border-color 150ms var(--ease-out), transform 120ms var(--ease-out) !important; color: transparent !important; font-size: 0 !important; }
+.ex-check svg { width: 12px; height: 12px; fill: none; stroke: #001018; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.ex-check svg path { stroke-dasharray: 16; stroke-dashoffset: 16; transition: stroke-dashoffset 160ms var(--ease-out); }
+.ex-check.checked svg path { stroke-dashoffset: 0; transition-delay: 40ms; }
+.ex-check:active { transform: scale(0.88) !important; }
+.ex-table tbody tr { transition: opacity 200ms var(--ease-out), background-color 150ms ease !important; }
+.ex-table .ex-name { text-decoration: line-through; text-decoration-color: transparent; text-decoration-thickness: 2px; transition: text-decoration-color 200ms var(--ease-out); }
+.ex-table tbody tr.exercise-done .ex-name { text-decoration-color: currentColor; }
+
+/* session progress */
+.sp-fill { width: 100% !important; transform: scaleX(0); transform-origin: left center; transition: transform 300ms var(--ease-out) !important; }
+
+/* rest timer */
+.rest-timer-overlay { transition: opacity 250ms var(--ease-out), transform 250ms var(--ease-out) !important; transform-origin: bottom center; }
+.rt-dial { position: relative; width: 132px; height: 132px; margin: 6px auto 10px; display: grid; place-items: center; }
+.rt-ring { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
+.rt-ring circle { fill: none; stroke-width: 6; }
+.rt-ring-track { stroke: rgba(255,255,255,0.08); }
+.rt-ring-fill { stroke: var(--acid); stroke-linecap: round; stroke-dasharray: 100; stroke-dashoffset: 0; transition: stroke-dashoffset 1s linear, stroke 300ms ease; }
+.rest-timer-overlay:has(.rt-time.warning) .rt-ring-fill { stroke: var(--orange); }
+.rt-time { position: relative; font-size: 44px !important; font-variant-numeric: tabular-nums; }
+.rt-time.done { animation: rtDone 420ms var(--ease-out) 1 !important; }
+@keyframes rtDone { 0% { transform: scale(0.9); opacity: 0.4; } 100% { transform: scale(1); opacity: 1; } }
+
+/* sessions open/close (height measured in JS) */
+.sb-body { max-height: none !important; height: 0; transition: none !important; }
+.sb-body.open { height: auto; }
+
+/* numbers that change on phase switch */
+.mc-val, .daily-totals, #mealTimeline { font-variant-numeric: tabular-nums; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ex-check svg path, .sp-fill, .rt-ring-fill, .ex-table .ex-name { transition: none !important; }
+  .rt-time.done { animation: none !important; }
+}
 </style>
 <script>
 (function () {
@@ -5001,8 +5041,10 @@ html.forge-still #snowCanvas, html.forge-still .hero-canvas { visibility: hidden
 <!-- REST TIMER -->
 <div class="rest-timer-overlay" id="restTimer">
   <div class="rt-label">REST TIMER</div>
-  <div class="rt-time" id="rtTime">0:00</div>
-  <div class="rt-bar"><div class="rt-bar-fill" id="rtBarFill"></div></div>
+  <div class="rt-dial">
+    <svg class="rt-ring" viewBox="0 0 120 120" aria-hidden="true"><circle class="rt-ring-track" cx="60" cy="60" r="54"/><circle class="rt-ring-fill" id="rtRing" cx="60" cy="60" r="54" pathLength="100"/></svg>
+    <div class="rt-time" id="rtTime">0:00</div>
+  </div>
   <div class="rt-btns">
     <button class="rt-btn rt-btn-add" id="rtAdd30">+30s</button>
     <button class="rt-btn rt-btn-skip" id="rtSkip">SKIP</button>
@@ -5886,7 +5928,7 @@ function initSessions() {
   // Exercise row click -> detail modal
   $$('.ex-table tbody tr').forEach(row => {
     row.addEventListener('click', (e) => {
-      if (e.target.closest('.log-quick-btn')) return;
+      if (e.target.closest('.log-quick-btn, .rest-cell, .ex-video-btn, .ex-check')) return;
       const nameEl = row.querySelector('.ex-name');
       const equipEl = row.querySelector('.ex-equip');
       const setsEl = row.querySelector('.sets-cell');
@@ -6813,7 +6855,12 @@ function initVolumeChart() {
 function initRestTimer() {
   const overlay = $('#restTimer');
   const timeEl = $('#rtTime');
-  const barEl = $('#rtBarFill');
+  const ringEl = $('#rtRing');
+  const setRing = (left, instant) => {
+    if (instant) { ringEl.style.transition = 'none'; ringEl.getBoundingClientRect(); }
+    ringEl.style.strokeDashoffset = String(100 - left * 100);
+    if (instant) requestAnimationFrame(() => { ringEl.style.transition = ''; });
+  };
   let interval = null;
   let remaining = 0;
   let total = 0;
@@ -6824,6 +6871,7 @@ function initRestTimer() {
     total = seconds;
     overlay.classList.add('active');
     timeEl.classList.remove('warning','done');
+    setRing(1, true);
     tick();
     interval = setInterval(tick, 1000);
   }
@@ -6833,7 +6881,8 @@ function initRestTimer() {
       clearInterval(interval);
       timeEl.textContent = 'GO!';
       timeEl.classList.add('done');
-      barEl.style.width = '100%';
+      setRing(0);
+      try { if (navigator.vibrate) navigator.vibrate([180, 90, 180]); } catch (e) {}
       // Auto-hide after 5s
       setTimeout(() => overlay.classList.remove('active'), 5000);
       // Play beep sound
@@ -6851,7 +6900,7 @@ function initRestTimer() {
     const min = Math.floor(remaining / 60);
     const sec = remaining % 60;
     timeEl.textContent = `${min}:${sec.toString().padStart(2,'0')}`;
-    barEl.style.width = ((total - remaining) / total * 100) + '%';
+    setRing((remaining - 1) / total);
     if (remaining <= 10) timeEl.classList.add('warning');
     remaining--;
   }
@@ -6911,7 +6960,8 @@ function initSessionChecklist() {
     if (!firstCell) return;
     const check = document.createElement('button');
     check.className = 'ex-check';
-    check.innerHTML = '&#10003;';
+    check.innerHTML = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7"/></svg>';
+    check.setAttribute('aria-label', 'Mark as done');
     check.title = 'Mark as done';
     firstCell.insertBefore(check, firstCell.firstChild);
 
@@ -6931,7 +6981,7 @@ function initSessionChecklist() {
     if (totals) {
       const prog = document.createElement('div');
       prog.className = 'session-progress';
-      prog.innerHTML = '<div class="sp-bar"><div class="sp-fill" style="width:0%"></div></div><div class="sp-text">0 / 0</div>';
+      prog.innerHTML = '<div class="sp-bar"><div class="sp-fill"></div></div><div class="sp-text">0 / 0</div>';
       totals.parentNode.insertBefore(prog, totals);
     }
   });
@@ -6943,7 +6993,7 @@ function updateSessionProgress(sbInner) {
   const progEl = sbInner.querySelector('.session-progress');
   if (!progEl) return;
   const pct = total > 0 ? (done / total * 100) : 0;
-  progEl.querySelector('.sp-fill').style.width = pct + '%';
+  progEl.querySelector('.sp-fill').style.transform = `scaleX(${pct / 100})`;
   progEl.querySelector('.sp-text').textContent = `${done} / ${total}`;
   if (done === total && total > 0) {
     progEl.querySelector('.sp-text').style.color = 'var(--acid)';
@@ -7883,6 +7933,73 @@ function initForgeEffects() {
   document.querySelectorAll('.ai-sug').forEach(btn => {
     btn.addEventListener('click', () => send(btn.dataset.q));
   });
+})();
+</script>
+<script>
+(function () {
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+  var EASE = 'cubic-bezier(0.23, 1, 0.32, 1)';
+
+  function watchAccordions() {
+    document.querySelectorAll('.sb-body').forEach(function (body) {
+      var wasOpen = body.classList.contains('open');
+      new MutationObserver(function () {
+        var isOpen = body.classList.contains('open');
+        if (isOpen === wasOpen) return;
+        wasOpen = isOpen;
+        if (reduce.matches || !body.animate) return;
+        var h = body.scrollHeight;
+        var inner = body.firstElementChild;
+        body.getAnimations().forEach(function (a) { a.cancel(); });
+        body.animate(isOpen ? [{ height: '0px' }, { height: h + 'px' }] : [{ height: h + 'px' }, { height: '0px' }],
+          { duration: Math.min(320, 200 + h / 40), easing: EASE });
+        if (inner && inner.animate) {
+          inner.animate(isOpen ? [{ opacity: 0, transform: 'translateY(-6px)' }, { opacity: 1, transform: 'none' }]
+                               : [{ opacity: 1 }, { opacity: 0 }], { duration: isOpen ? 240 : 160, easing: EASE });
+        }
+      }).observe(body, { attributes: true, attributeFilter: ['class'] });
+    });
+  }
+
+  function roll(el, from, to, fmt) {
+    if (reduce.matches || from === to || !isFinite(from)) { el.nodeValue = fmt(to); return; }
+    var t0 = performance.now(), d = 300;
+    (function step(t) {
+      var k = Math.min(1, (t - t0) / d), e = 1 - Math.pow(1 - k, 3);
+      el.nodeValue = fmt(from + (to - from) * e);
+      if (k < 1) requestAnimationFrame(step);
+    })(t0);
+  }
+  window.forgeRoll = roll;
+
+  function watchMacros() {
+    var grid = document.getElementById('macroGrid');
+    var meals = document.getElementById('mealTimeline');
+    if (!grid) return;
+    var last = null;
+    var read = function () {
+      return Array.prototype.map.call(grid.querySelectorAll('.mc-val'), function (v) {
+        var n = v.firstChild; return n && n.nodeType === 3 ? n : null;
+      });
+    };
+    var snapshot = function () { return read().map(function (n) { return n ? parseFloat(n.nodeValue.replace(/,/g, '')) : NaN; }); };
+    last = snapshot();
+    new MutationObserver(function () {
+      var nodes = read(), prev = last;
+      last = snapshot();
+      nodes.forEach(function (n, i) {
+        if (!n) return;
+        var to = last[i], from = prev[i];
+        var comma = /,/.test(n.nodeValue);
+        roll(n, from, to, function (v) { return comma ? Math.round(v).toLocaleString('en-US') : String(Math.round(v)); });
+      });
+      if (meals && meals.animate && !reduce.matches) {
+        meals.animate([{ opacity: 0.35, transform: 'translateY(6px)' }, { opacity: 1, transform: 'none' }], { duration: 220, easing: EASE });
+      }
+    }).observe(grid, { childList: true });
+  }
+
+  document.addEventListener('DOMContentLoaded', function () { watchAccordions(); watchMacros(); });
 })();
 </script>
 <script>
