@@ -160,6 +160,14 @@ details.recipe[open] summary::after { content: '\2212'; }
 .footer { text-align: center; padding: 32px 0; border-top: 1px solid var(--border); margin-top: 20px; }
 .footer p { font-size: 10px; color: var(--muted); letter-spacing: 3px; text-transform: uppercase; font-family: 'Barlow Condensed', sans-serif; }
 
+html { -webkit-tap-highlight-color: transparent; }
+button, a, summary { touch-action: manipulation; -webkit-user-select: none; user-select: none; }
+.phase-tab, details.recipe summary, .topbar a { transition: transform 100ms cubic-bezier(0.23, 1, 0.32, 1); }
+.phase-tab:active, details.recipe summary:active { transform: scale(0.97); }
+:focus-visible { outline: 2px solid var(--acid); outline-offset: 2px; }
+::selection { background: rgba(0,212,255,0.35); color: #fff; }
+.phase-tabs { scroll-snap-type: x proximity; overscroll-behavior-x: contain; }
+.phase-tab { scroll-snap-align: start; min-height: 44px; }
 @media (max-width: 560px) {
   .rotation-grid, .recipe-grid, .variant-grid { grid-template-columns: 1fr; }
   .macro-row { grid-template-columns: repeat(5, 1fr); gap: 4px; }
@@ -612,7 +620,7 @@ document.querySelector('#phaseTable tbody').innerHTML = PHASES.map(p => {
 
 document.getElementById('phaseTabs').addEventListener('click', e => {
   const b = e.target.closest('.phase-tab');
-  if (b) render(b.dataset.id);
+  if (b) { render(b.dataset.id); b.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' }); }
 });
 document.getElementById('phaseTable').addEventListener('click', e => {
   const tr = e.target.closest('tr[data-id]');

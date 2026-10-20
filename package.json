@@ -1,0 +1,11 @@
+{
+  "name": "forge",
+  "private": true,
+  "scripts": {
+    "test": "playwright test",
+    "test:live": "BASE_URL=https://vishnu1609.github.io/forge/ playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.48.2"
+  }
+}
